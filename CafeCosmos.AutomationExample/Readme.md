@@ -16,7 +16,7 @@ The program interacts with Ethereum-based smart contracts to:
 
 This program relies on the **MUD Tables Log Processor** to fetch and process log events from the blockchain and populate the PostgreSQL database (`storerecords` table). If the background processor is not running, you won't be able to run that sample :), so comment it out.
 
-For detailed setup instructions and access to the code, refer to the [MUD Tables Log Processor Project Documentation](#).
+For detailed setup instructions and access to the code, refer to the [MUD Tables Log Processor Project Documentation](../VisionsContracts.LogProcessing.Postgres/Readme.md).
 
 ## Prerequisites
 
