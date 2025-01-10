@@ -8,7 +8,7 @@ If you are interested on how to interact with the project, a good starting point
 
 ## VisionsContracts Project
 
-The VisionContracts project is the central part of the solution, as depicted in the integration diagram below. 
+The VisionContracts project is the central part of the solution.
 
 NOTE THIS DOCUMENT IS WIP
 
