@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <BaseOutputPath>..\Build\$(MSBuildProjectName)\bin</BaseOutputPath>
+        <BaseIntermediateOutputPath>..\Build\$(MSBuildProjectName)\obj</BaseIntermediateOutputPath>
+        <LangVersion>preview</LangVersion>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+    <ItemGroup>
+      <None Remove="**\*.meta" />
+    </ItemGroup>
+	
+	
+    <ItemGroup>
+      <PackageReference Include="Nethereum.Mud" Version="4.28.0" />
+      <PackageReference Include="Nethereum.Mud.Contracts" Version="4.28.0" />
+      <PackageReference Include="Nethereum.Web3" Version="4.28.0" />
+    </ItemGroup>
+
+    
+</Project>

@@ -1,0 +1,6 @@
+@VisionContracts.StoredRecordsRestApi_HostAddress = http://localhost:5073
+
+GET {{VisionContracts.StoredRecordsRestApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,116 @@
+using System;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Numerics;
+using Nethereum.Hex.HexTypes;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Contracts.CQS;
+using Nethereum.Contracts;
+using System.Threading;
+
+namespace VisionsContracts.Land.Systems.LandTokensSystem.ContractDefinition
+{
+
+
+    public partial class LandTokensSystemDeployment : LandTokensSystemDeploymentBase
+    {
+        public LandTokensSystemDeployment() : base(BYTECODE) { }
+        public LandTokensSystemDeployment(string byteCode) : base(byteCode) { }
+    }
+
+    public class LandTokensSystemDeploymentBase : ContractDeploymentMessage
+    {
+        public static string BYTECODE = "0x608080604052346015576106c5908161001a8239f35b5f80fdfe6080806040526004361015610012575f80fd5b5f3560e01c90816301ffc9a71461021257508063119df25f146101d657806313f4dd25146100a257806345ec9354146100835763e1af802c14610053575f80fd5b3461007f575f36600319011261007f57602061006d61029c565b6040516001600160a01b039091168152f35b5f80fd5b3461007f575f36600319011261007f576020604051601f193601358152f35b3461007f57602036600319011261007f5760206100d16040516100c58382610265565b5f81525f3681376102d4565b60601c6024826100f36040516100e78382610265565b5f81525f3681376104d5565b60601c604051928380926331a9108f60e11b825260043560048301525afa801561018c5783915f91610197575b506040516370a0823160e01b81526001600160a01b03909116600482015291829060249082905afa90811561018c575f9161015f575b50604051908152f35b90508181813d8311610185575b6101768183610265565b8101031261007f575182610156565b503d61016c565b6040513d5f823e3d90fd5b82819392503d83116101cf575b6101ae8183610265565b8101031261007f57516001600160a01b038116810361007f57829084610120565b503d6101a4565b3461007f575f36600319011261007f5736603319013560601c801561020b575b6040516001600160a01b039091168152602090f35b50336101f6565b3461007f57602036600319011261007f576004359063ffffffff60e01b821680920361007f5760209163b5dee12760e01b8114908115610254575b5015158152f35b6301ffc9a760e01b1490508361024d565b601f909101601f19168101906001600160401b0382119082101761028857604052565b634e487b7160e01b5f52604160045260245ffd5b7f629a4c26e296b22a8e0856e9f6ecb2d1008d7e00081111962cd175fa7488e175546001600160a01b0316806102d157503390565b90565b6001600160a01b036102e461029c565b16308103610401575060405160208101916f436f6e66696741646472657373657300613a3160f11b01835281604081019160208151939101925f5b8181106103e857505061033b925003601f198101835282610265565b5190205f5160206106705f395f51905f52185f905f5b600181106103a457508181602082101561038e575b505080548260031b1b91602003908160141161038157505090565b600101549060031b1c1790565b90809350601f925060051c019116905f80610366565b9160ff6d3702c00505050505050505050505608a1b84601b0360031b1c1681018091116103d45791600101610351565b634e487b7160e01b5f52601160045260245ffd5b845183526020948501948694509092019160010161031f565b604051638c364d5960e01b81526f436f6e66696741646472657373657300613a3160f11b016004820152608060248201528251608482018190529092839160a4830191602001905f5b8181106104bc57505050918180602094600160448301526d3702c00505050505050505050505608a1b606483015203915afa90811561018c575f9161048d575090565b90506020813d6020116104b4575b816104a860209383610265565b8101031261007f575190565b3d915061049b565b825184528694506020938401939092019160010161044a565b6001600160a01b036104e561029c565b163081036105ca575060405160208101916f436f6e66696741646472657373657300613a3160f11b01835281604081019160208151939101925f5b8181106105b157505061053c925003601f198101835282610265565b5190205f5160206106705f395f51905f52185f905f5b6004811061058157508181602082101561038e57505080548260031b1b91602003908160141161038157505090565b9160ff6d3702c00505050505050505050505608a1b84601b0360031b1c1681018091116103d45791600101610552565b8451835260209485019486945090920191600101610520565b604051638c364d5960e01b81526f436f6e66696741646472657373657300613a3160f11b016004820152608060248201528251608482018190529092839160a4830191602001905f5b81811061065657505050918180602094600460448301526d3702c00505050505050505050505608a1b606483015203915afa90811561018c575f9161048d575090565b825184528694506020938401939092019160010161061356fe86425bff6b57326c7859e89024fe4f238ca327a1ae4a230180dd2f0e88aaa7d9a26469706673582212203585b06afa5b3260f7216e78aa99e2a1cdabf4fef3da2f8cb4c4fb1600d12d5b64736f6c634300081c0033";
+        public LandTokensSystemDeploymentBase() : base(BYTECODE) { }
+        public LandTokensSystemDeploymentBase(string byteCode) : base(byteCode) { }
+
+    }
+
+    public partial class MsgSenderFunction : MsgSenderFunctionBase { }
+
+    [Function("_msgSender", "address")]
+    public class MsgSenderFunctionBase : FunctionMessage
+    {
+
+    }
+
+    public partial class MsgValueFunction : MsgValueFunctionBase { }
+
+    [Function("_msgValue", "uint256")]
+    public class MsgValueFunctionBase : FunctionMessage
+    {
+
+    }
+
+    public partial class WorldFunction : WorldFunctionBase { }
+
+    [Function("_world", "address")]
+    public class WorldFunctionBase : FunctionMessage
+    {
+
+    }
+
+    public partial class SupportsInterfaceFunction : SupportsInterfaceFunctionBase { }
+
+    [Function("supportsInterface", "bool")]
+    public class SupportsInterfaceFunctionBase : FunctionMessage
+    {
+        [Parameter("bytes4", "interfaceId", 1)]
+        public virtual byte[] InterfaceId { get; set; }
+    }
+
+    public partial class TokenBalanceOfFunction : TokenBalanceOfFunctionBase { }
+
+    [Function("tokenBalanceOf", "uint256")]
+    public class TokenBalanceOfFunctionBase : FunctionMessage
+    {
+        [Parameter("uint256", "landId", 1)]
+        public virtual BigInteger LandId { get; set; }
+    }
+
+    public partial class MsgSenderOutputDTO : MsgSenderOutputDTOBase { }
+
+    [FunctionOutput]
+    public class MsgSenderOutputDTOBase : IFunctionOutputDTO 
+    {
+        [Parameter("address", "sender", 1)]
+        public virtual string Sender { get; set; }
+    }
+
+    public partial class MsgValueOutputDTO : MsgValueOutputDTOBase { }
+
+    [FunctionOutput]
+    public class MsgValueOutputDTOBase : IFunctionOutputDTO 
+    {
+        [Parameter("uint256", "value", 1)]
+        public virtual BigInteger Value { get; set; }
+    }
+
+    public partial class WorldOutputDTO : WorldOutputDTOBase { }
+
+    [FunctionOutput]
+    public class WorldOutputDTOBase : IFunctionOutputDTO 
+    {
+        [Parameter("address", "", 1)]
+        public virtual string ReturnValue1 { get; set; }
+    }
+
+    public partial class SupportsInterfaceOutputDTO : SupportsInterfaceOutputDTOBase { }
+
+    [FunctionOutput]
+    public class SupportsInterfaceOutputDTOBase : IFunctionOutputDTO 
+    {
+        [Parameter("bool", "", 1)]
+        public virtual bool ReturnValue1 { get; set; }
+    }
+
+    public partial class TokenBalanceOfOutputDTO : TokenBalanceOfOutputDTOBase { }
+
+    [FunctionOutput]
+    public class TokenBalanceOfOutputDTOBase : IFunctionOutputDTO 
+    {
+        [Parameter("uint256", "", 1)]
+        public virtual BigInteger ReturnValue1 { get; set; }
+    }
+}

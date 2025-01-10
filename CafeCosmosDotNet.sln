@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35605.110 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionsContracts.LogProcessing.Postgres", "VisionsContracts.LogProcessing.Postgres\VisionsContracts.LogProcessing.Postgres.csproj", "{77B86AB1-0B36-A1D5-9998-B0ED07C459D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionsContracts", "VisionsContracts\VisionsContracts.csproj", "{E9E260A9-2D6B-94F7-EB14-7D0CB7D084E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionContracts.StoredRecordsRestApi", "VisionContracts.StoredRecordsRestApi\VisionContracts.StoredRecordsRestApi.csproj", "{9434DD62-9336-8394-C63F-D90A8E4BDBE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionContracts.Normaliser.Console", "VisionContracts.Normarliser.Console\VisionContracts.Normaliser.Console.csproj", "{F8E54C55-2298-EEE3-D404-7DAF199A66B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpUtil", "HttpUtil\HttpUtil.csproj", "{6BB81AE6-33CC-A133-8798-A62E6A7B6371}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmos.AutomationExample", "CafeCosmos.AutomationExample\CafeCosmos.AutomationExample.csproj", "{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77B86AB1-0B36-A1D5-9998-B0ED07C459D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77B86AB1-0B36-A1D5-9998-B0ED07C459D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77B86AB1-0B36-A1D5-9998-B0ED07C459D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77B86AB1-0B36-A1D5-9998-B0ED07C459D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9E260A9-2D6B-94F7-EB14-7D0CB7D084E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9E260A9-2D6B-94F7-EB14-7D0CB7D084E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9E260A9-2D6B-94F7-EB14-7D0CB7D084E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9E260A9-2D6B-94F7-EB14-7D0CB7D084E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9434DD62-9336-8394-C63F-D90A8E4BDBE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9434DD62-9336-8394-C63F-D90A8E4BDBE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9434DD62-9336-8394-C63F-D90A8E4BDBE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9434DD62-9336-8394-C63F-D90A8E4BDBE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E54C55-2298-EEE3-D404-7DAF199A66B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E54C55-2298-EEE3-D404-7DAF199A66B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E54C55-2298-EEE3-D404-7DAF199A66B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E54C55-2298-EEE3-D404-7DAF199A66B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BB81AE6-33CC-A133-8798-A62E6A7B6371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BB81AE6-33CC-A133-8798-A62E6A7B6371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BB81AE6-33CC-A133-8798-A62E6A7B6371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BB81AE6-33CC-A133-8798-A62E6A7B6371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08D859CA-3399-4AF6-A411-0CD490F653E5}
+	EndGlobalSection
+EndGlobal

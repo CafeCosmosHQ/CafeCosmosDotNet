@@ -1,0 +1,12 @@
+{
+  "name": "com.visions.visions-contracts",
+  "displayName": "visions-contracts",
+  "version": "0.0.1",
+  "unity": "2018.1",
+  "description": "vision nethereum api",
+  "keywords": [
+    "unity"
+  ],
+  "category": "Unity",
+  "type": "library"
+}
