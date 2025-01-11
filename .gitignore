@@ -396,3 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+CafeCosmos.AutomationExample2/Program.cs
+CafeCosmos.AutomationExample2/appsettings.Development.json
+CafeCosmos.AutomationExample2/appsettings.json
+CafeCosmos.AutomationExample2/CafeCosmos.AutomationExample2.csproj
+CafeCosmos.AutomationExample2/ContinuousHarvestingCollectingAndCookingSimpleAppliancesStrategy.cs
+CafeCosmos.AutomationExample2/Readme.md
+repomix-output.txt
