@@ -6,6 +6,17 @@ The heart of the solution is the VisionContracts project, which has the essentia
 
 If you are interested on how to interact with the project, a good starting point is the [CafeCosmos automation example](CafeCosmos.AutomationExample/Readme.md). 
 
+## Project Summary
+* **Visions Contracts**. The central part of the solution, includes all the core logic.
+* **Cafe Cosmos Blazor**. The game in an html / wasm version using Blazor.
+  <details><summary>The website</summary>![image](https://github.com/user-attachments/assets/6abbbfcc-d65f-44b7-b17e-d4879f13adfa)</details>
+* **CafeCosmos.AutomationExample** The best place to get started to programmatically interact with the game
+* **VisionsContracts.LogProcessing.Postgres** Mud tables event changes indexer in postgres.
+ <details><summary>Database Example</summary></details>
+ 
+* **VisionContracts.Normarliser.Console** Normalizes the mud table into separate tables already decoded
+* **VisionContracts.StoredRecordsRestApi** Rest service to query remotely the postgress database.
+
 ## VisionsContracts Project
 
 The VisionContracts project is the central part of the solution.
