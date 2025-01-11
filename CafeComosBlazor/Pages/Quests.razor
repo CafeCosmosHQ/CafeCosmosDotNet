@@ -1,0 +1,251 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using System.Numerics
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land.Systems.QuestsSystem.Model
+@using Nethereum.Web3
+@using Nethereum.Hex.HexConvertors.Extensions
+
+<MudPaper Class="mt-10; pl-4" Width="100%" Height="800px">
+
+    <MudText Typo="Typo.h5">Quests</MudText>
+    @foreach(var questGroup in GameViewModel.GetActiveQuestGroupsFromLocalState())
+    {
+        <MudText Typo="Typo.h6">@GetQuestGroupTypeName((int)questGroup.QuestGroupType)</MudText>
+        <MudText Typo="Typo.body1"><b>Progress: @GetQuestGroupProgress(questGroup)</b> </MudText>
+
+        <MudStack Row="true" Style="margin-top:2px">
+            @foreach(var quest in questGroup.Quests)
+            {
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">@quest.QuestName</MudText>
+                        <MudText Typo="Typo.body1"><b>Rewards</b></MudText>
+
+                        @foreach (var reward in quest.Rewards)
+                        {
+
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+
+                                <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetRewardImage(reward)" Size="Size.Medium" />
+
+                                <MudStack Spacing="0" Row="false" AlignItems="AlignItems.Start">
+                                    <MudText Typo="Typo.body2">
+                                        <b>@GetRewardTypeName(reward)</b>
+                                    </MudText>
+                                    <MudText Typo="Typo.body2">
+                                        <i>Quantity:  @GetRewardQuantity(reward)</i>
+                                    </MudText>
+
+                                </MudStack>
+
+                            </MudStack>
+                        }
+
+                        <MudText Typo="Typo.body1"><b>Tasks</b></MudText>
+                        @foreach(var task in quest.Tasks)
+                        {
+                            <MudText Typo="Typo.body2"><b>@GetTaskName(quest, task)</b></MudText>
+                            <MudText Typo="Typo.body2">Progress: @GetTaskProgress(questGroup, task)</MudText>
+
+                        }
+
+                    </MudCardContent>
+                    <MudCardActions>
+
+                    </MudCardActions>
+                </MudCard>
+            }
+        </MudStack>
+
+        <MudText Typo="Typo.body1"><b>Rewards for completing all quests</b></MudText>
+        @foreach (var group_reward in questGroup.Rewards)
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+
+                <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetRewardImage(group_reward)" Size="Size.Medium" />
+
+                <MudStack Spacing="0" Row="false" AlignItems="AlignItems.Start">
+                    <MudText Typo="Typo.body2">
+                        <b>@GetRewardTypeName(group_reward)</b>
+                    </MudText>
+                    <MudText Typo="Typo.body2">
+                        <i>Quantity: @GetRewardQuantity(group_reward)</i>
+                    </MudText>
+
+                </MudStack>
+
+            </MudStack>
+        }
+
+    }   
+</MudPaper>
+
+
+@code {
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+    public string GetQuestGroupTypeName(int questGroupTypeInt)
+    {
+        var questGroupType = (QuestGroupType)questGroupTypeInt;
+        switch (questGroupType)
+        {
+            case QuestGroupType.Daily:
+                return "Daily Quests";
+            case QuestGroupType.Weekly:
+                return "Weekly Quests";
+            default:
+                return "Unknown Quests";
+        }   
+    }
+
+    public string GetRewardTypeName(Reward reward)
+    {
+        var rewardType = (RewardType)(int)reward.RewardType;
+        switch (rewardType)
+        {
+            case RewardType.XP:
+                return "XP";
+            case RewardType.Item:
+                return GetItemName(reward.ItemId);
+            case RewardType.SoftToken:
+                return "Token";
+            default:
+                return "Unknown Reward";
+        }
+    }
+
+    public string GetRewardImage(Reward reward)
+    {
+        var rewardType = (RewardType)(int)reward.RewardType;
+        switch (rewardType)
+        {
+            case RewardType.XP:
+                return "images/icons/xp_icon.png";
+            case RewardType.Item:
+                return GetImage(reward.ItemId);
+            case RewardType.SoftToken:
+                return "images/icons/token_icon.png";
+            default:
+                return "images/icons/unknown_icon.png";
+        }
+    }
+
+    public string GetTaskName(Quest quest, QuestTask task)
+    {
+        if(string.IsNullOrEmpty(task.Name) && quest.Tasks.Count() == 1){
+            return quest.QuestName;
+        }
+        return task.Name;
+    }
+
+    public string GetTaskProgress(QuestGroup questGroup, QuestTask task)
+    {
+        var activeLandQuestGroups = GameViewModel.GetActiveLandQuestGroupsFromLocalState();
+        if (activeLandQuestGroups == null || activeLandQuestGroups.Count == 0) {
+            var completedQuestGroups = GameViewModel.GetCompletedActiveLandQuestGroupsFromLocalState();
+            var completedQuestGroup = completedQuestGroups.FirstOrDefault(x => x.QuestGroupId == questGroup.Id);
+            if (completedQuestGroup != null)
+            {
+                return "Completed";
+            };
+        } else { 
+            var activeLandQuestGroup = activeLandQuestGroups.FirstOrDefault(x => x.QuestGroupId == questGroup.Id);
+            if (activeLandQuestGroup == null) return "Not Started";
+            var activeQuest = activeLandQuestGroup.LandQuests.FirstOrDefault(x => x.QuestId == task.QuestId);
+            var landTaskQuest = activeQuest.LandTaskProgress.FirstOrDefault(x => x.QuestGroupId == questGroup.Id && x.QuestId == task.QuestId && x.TaskType == task.TaskType && x.TaskKey.ToHex().IsTheSameHex(task.Key.ToHex()));
+            if (landTaskQuest == null) return "Not Started Land Task";
+            if (landTaskQuest.TaskCompleted) return "Completed";
+            return landTaskQuest.TaskProgress + "/" + task.Quantity;
+
+        }
+
+        return "Not Started";
+    }
+
+    public string GetQuestGroupProgress(QuestGroup questGroup){
+        var activeLandQuestGroups = GameViewModel.GetActiveLandQuestGroupsFromLocalState();
+        if (activeLandQuestGroups == null || activeLandQuestGroups.Count == 0)
+        {
+            var completedQuestGroups = GameViewModel.GetCompletedActiveLandQuestGroupsFromLocalState();
+            var completedQuestGroup = completedQuestGroups.FirstOrDefault(x => x.QuestGroupId == questGroup.Id);
+            if (completedQuestGroup != null)
+            {
+                return "Completed";
+            };
+
+        }
+        else
+        {
+           
+            var activeLandQuestGroup = activeLandQuestGroups.FirstOrDefault(x => x.QuestGroupId == questGroup.Id);
+            if (activeLandQuestGroup == null) return "Not Started";
+            var completedQuests = activeLandQuestGroup.LandQuests.Count(x => x.Claimed);
+            return completedQuests + "/" + activeLandQuestGroup.LandQuests.Count();
+        }
+
+        return "Not Started";
+    }
+
+    private string GetItemName(BigInteger id)
+    {
+        var item = DefaultItems.FindItemById(id);
+
+        if (item == null) return "Grass";
+        return item.Name;
+    }
+
+
+    public string GetRewardQuantity(Reward reward)
+    {
+        if (reward.RewardType == (int)RewardType.XP)
+        {
+            return reward.Quantity.ToString();
+        }
+        else if (reward.RewardType == (int)RewardType.Item)
+        {
+            return reward.Quantity.ToString();
+        }
+        else if (reward.RewardType == (int)RewardType.SoftToken)
+        {
+            return Web3.Convert.FromWei(reward.Quantity).ToString();
+        }
+        return "Unknown Reward";
+    }
+
+    private string errorMessage;
+
+  
+    private int GetId(Item item)
+    {
+        if (item == null) return 0;
+        return item.Id;
+    }
+
+   
+
+    private string GetImage(Item item)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == item.Id);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+    private string GetImage(BigInteger itemId)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == itemId);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+
+
+
+}

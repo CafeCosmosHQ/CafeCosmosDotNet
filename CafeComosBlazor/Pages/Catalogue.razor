@@ -1,0 +1,184 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land.Systems.CatalogueSystem.Model;
+
+<MudPaper Class="mt-5">
+    <MudCard Style="width:800px">
+        <MudCardContent>
+            <MudText Typo="Typo.h6">Find catalogue item to purchase</MudText>
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                @if (foundCatalogueItem != null)
+                {
+                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(foundCatalogueItem.Item)" Size="Size.Medium" />
+                }
+                <MudAutocomplete T="CatalogueItem" MaxItems="1000"
+                Label="Enter the name of the output to find the recipe" @bind-Value="foundCatalogueItem"
+                                 SearchFunc="@SearchCatalogueItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Item.Name}, (Price per unit: {e.PriceInMainUnit})")">
+
+                    <ItemTemplate Context="e">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e.Item)" Size="Size.Medium" />
+                            <MudText Typo="Typo.body2">
+                                @($"{GetCatalogueName(e)}, {e.Item.Name} (Price per unit: {e.PriceInMainUnit})")
+                            </MudText>
+                        </MudStack>
+                    </ItemTemplate>
+
+
+                </MudAutocomplete>
+            </MudStack>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="SelectFoundCatalogueItem">Select</MudButton>
+        </MudCardActions>
+    </MudCard>
+
+    @if (selectedCatalogueItem != null)
+    {
+
+        <MudCard Class="mt-16">
+            <MudCardContent>
+                <MudText Typo="Typo.h5">Purchase from Catalogue</MudText>
+
+                <table width="100%">
+
+                    <tr>
+                        <td>
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                @if (selectedCatalogueItem != null)
+                                {
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(selectedCatalogueItem.Item)" Size="Size.Medium" />
+                                }
+                                <MudStack Spacing="0" Row="false" AlignItems="AlignItems.Start">
+                                    <MudText Typo="Typo.body2">
+                                       <b>@selectedCatalogueItem.Item.Name</b>
+                                    </MudText>
+                                     <MudText Typo="Typo.body2">
+                                        <i>Price per unit: @selectedCatalogueItem.PriceInMainUnit</i>
+                                      </MudText>
+                                      <MudText Typo="Typo.caption">
+                                        @GetCatalogueName(selectedCatalogueItem)
+                                       </MudText>
+                                </MudStack>
+
+                            </MudStack>
+                        </td>
+                        <td>
+                            <MudTextField Label="Quantity" @bind-Value="purchaseQuantity" Type="InputType.Number">  </MudTextField>
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="PurchaseItemAsync">Purchase Item</MudButton>
+
+            </MudCardActions>
+        </MudCard>
+    }
+</MudPaper>
+@if(!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Class="mt-5" Severity="Severity.Error" Square="true" ShowCloseIcon="true" CloseIconClicked="(() => errorMessage = String.Empty)">@errorMessage</MudAlert>
+}
+
+@code {
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+
+    private CatalogueItem foundCatalogueItem;
+    private CatalogueItem selectedCatalogueItem;
+    private int purchaseQuantity;
+
+    private VisionsContracts.Land.Systems.CatalogueSystem.Model.Catalogue selectedCatalogue;
+
+
+    private string errorMessage;
+
+    private async Task<IEnumerable<Item>> SearchItemByName(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return DefaultItems.GetAllItems();
+        if (value == "0") return new List<Item>(
+                new[] { new Item("0 Empty", 0, ItemCategory.NotDefined, false, false, false, false, false) });
+        return DefaultItems.FindItemsByName(value);
+    }
+
+
+
+    private async Task<IEnumerable<CatalogueItem>> SearchCatalogueItemByName(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return GameViewModel.GetCatalogueItems();
+        var results = GameViewModel.GetCatalogueItems().Where(x => x.Item.Name.ToLower().Contains(value.ToLower()));
+        return results;
+    }
+
+
+
+    public void SelectFoundCatalogueItem(CatalogueItem foundCatalogueItem)
+    {
+        errorMessage = null;
+        if (foundCatalogueItem != null)
+        {
+            this.selectedCatalogueItem = foundCatalogueItem;
+            this.selectedCatalogue = GameViewModel.GetCatalogueById(foundCatalogueItem.CatalogueId);
+            this.purchaseQuantity = 1;
+        }
+        else
+        {
+            this.errorMessage = "Catalogue Item not found";
+        }
+    }
+
+    public void SelectFoundCatalogueItem()
+    {
+        SelectFoundCatalogueItem(this.foundCatalogueItem);
+        this.foundCatalogueItem = null;
+    }
+
+  
+
+    private int GetId(Item item)
+    {
+        if (item == null) return 0;
+        return item.Id;
+    }
+
+    private string GetCatalogueName(CatalogueItem catalogueItem)
+    {
+        return GameViewModel.GetCatalogueById(catalogueItem.CatalogueId).Name;
+    }
+
+    public async Task PurchaseItemAsync()
+    {
+        errorMessage = null;
+
+        var totalPrice = GameViewModel.CalculateTotalPurchaseCostAndBalance(selectedCatalogueItem.ItemId, purchaseQuantity);
+
+        if (totalPrice.TotalCostInEtherUnit > totalPrice.BalanceInEtherUnit)
+        {
+            errorMessage = $"Insufficient balance, total cost: {totalPrice.TotalCostInEtherUnit}, balance: {totalPrice.BalanceInEtherUnit}";
+            return;
+        }
+        
+        await GameViewModel.PurchaseCatalogueItemAsync(selectedCatalogueItem.ItemId, purchaseQuantity);
+      
+    }
+
+    private string GetImage(Item item)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == item.Id);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+    
+
+  
+
+}

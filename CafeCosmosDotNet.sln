@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35605.110 d17.13
+VisualStudioVersion = 17.13.35605.110
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionsContracts.LogProcessing.Postgres", "VisionsContracts.LogProcessing.Postgres\VisionsContracts.LogProcessing.Postgres.csproj", "{77B86AB1-0B36-A1D5-9998-B0ED07C459D4}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpUtil", "HttpUtil\HttpUtil.csproj", "{6BB81AE6-33CC-A133-8798-A62E6A7B6371}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmos.AutomationExample", "CafeCosmos.AutomationExample\CafeCosmos.AutomationExample.csproj", "{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmos.AutomationExample2", "CafeCosmos.AutomationExample2\CafeCosmos.AutomationExample2.csproj", "{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D64289F-8A0B-1012-6E63-5D6BB5D7216F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

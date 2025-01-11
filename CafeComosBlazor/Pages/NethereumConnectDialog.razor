@@ -1,0 +1,44 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField Label="RPC Url" @bind-Value="url" />
+
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField FullWidth=true MaxLength="66" Label="Private key" @bind-Value="privateKey" />
+
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="SubmitAsync">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public SelectedEthereumHostProviderService SelectedEthereumHostProviderService { get; set; }
+    [Parameter] public NethereumHostProvider NethereumHostProvider { get; set; }
+
+    string url = "";
+    string privateKey = "";
+
+    async Task SubmitAsync()
+    {
+        try
+        {
+            await NethereumHostProvider.SetUrl(url);
+            NethereumHostProvider.SetSelectedAccount(privateKey);
+            await SelectedEthereumHostProviderService.SetSelectedEthereumHostProvider(NethereumHostProvider);
+            MudDialog.Close(DialogResult.Ok(true));
+
+        }catch(Exception ex)
+        {
+            MudDialog.Close(DialogResult.Ok(false));
+        }
+    }
+    void Cancel() => MudDialog.Cancel();
+}

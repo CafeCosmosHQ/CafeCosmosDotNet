@@ -403,3 +403,6 @@ CafeCosmos.AutomationExample2/CafeCosmos.AutomationExample2.csproj
 CafeCosmos.AutomationExample2/ContinuousHarvestingCollectingAndCookingSimpleAppliancesStrategy.cs
 CafeCosmos.AutomationExample2/Readme.md
 repomix-output.txt
+CafeComosBlazor/ViewModel/LandTestScenarioViewModel.cs
+CafeComosBlazor/Pages/LandTestScenario.razor
+CafeComosBlazor/Services/FriendsService.cs

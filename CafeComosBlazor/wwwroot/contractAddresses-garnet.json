@@ -1,0 +1,9 @@
+{
+  "ChainId": 17069,
+  "RedistributorAddress": "0x832645b9a9ad48041134a600dcb69cdc187f0294",
+  "TokenAddress": "0x08fb54fae2b80a0f51d5e712973ba3235de3d0ce",
+  "ItemsAddress": "0x44b180a8fdbb0a0eddcf0acaf58675db8c0c82ec",
+  "LandAddress": "0x10d912384397D9D131c85130dCa6CD53C7DD89Fb",
+  "VestingAddress": "0x39488346744200b182e69721ebd625ddc70f7a3e",
+  "LandNFTAddress": "0x53b9fe2d3fabeb1239e618cb7197177e1752703c"
+}

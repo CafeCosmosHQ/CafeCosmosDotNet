@@ -14,6 +14,7 @@ namespace VisionsContracts
         public const long LOCAHOST = 31337;
         public const long NITRO_TESTNET = 6826714;
         public const long GARNET_HOLESKY = 17069;
+        public const long REDSTONE = 690;
 
         public static AddEthereumChainParameter GetAddEthereumChainParameter(long chainId)
         {
@@ -81,6 +82,22 @@ namespace VisionsContracts
                         },
                         RpcUrls = new List<string> { "https://rpc.garnetchain.com" },
                         BlockExplorerUrls = new List<string> { "https://explorer.garnetchain.com/" }
+                    };
+
+                case REDSTONE:
+
+                    return new AddEthereumChainParameter
+                    {
+                        ChainId = new HexBigInteger(REDSTONE),
+                        ChainName = "Redstone",
+                        NativeCurrency = new NativeCurrency()
+                        {
+                            Decimals = 18,
+                            Name = "ETH",
+                            Symbol = "ETH"
+                        },
+                        RpcUrls = new List<string> { "https://rpc.redstonechain.com" },
+                        BlockExplorerUrls = new List<string> { "https://explorer.redstone.xyz" }
                     };
 
                 case LOCAHOST:

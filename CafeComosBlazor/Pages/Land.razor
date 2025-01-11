@@ -1,0 +1,460 @@
+﻿@implements IBrowserViewportObserver
+@implements IAsyncDisposable
+@using VisionsContracts.Land.Model
+@using VisionsContracts.LandLocalState
+@using CafeCosmosBlazor.ViewModel;
+@using System.Numerics;
+@using System.Net;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Items;
+@using VisionsContracts.Land;
+@using VisionsContracts.Transformations.Model;
+@using VisionsContracts.Transformations;
+@using MudBlazor.Services;
+
+
+<style>
+    .positionCell{
+    background-color:transparent;font-weight:500;color:gray
+    }
+
+    .positionCellHorizontal {
+    height:30px;
+    }
+
+    .positionCellVertical
+    {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-align: center!important;
+    width:30px!important;
+    padding:0px!important;
+
+    }
+
+    .mud-table-container{
+    overflow-y:visible;
+    }
+</style>
+
+<div @ref="keyDownDiv" @onkeydown="KeyPress">
+    <MudStack Class="mt-2 p-0" AlignItems="AlignItems.Center" Spacing="0">
+        <MudIconButton @ref="btnUp" Icon="@Icons.Material.Filled.KeyboardDoubleArrowUp" Style="width:200px" OnClick="() => ChangeMinY(-1)" />
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+            <MudIconButton @ref="btnLeft" Icon="@Icons.Material.Filled.KeyboardDoubleArrowLeft" Style="height:200px" OnClick="() => ChangeMinX(-1)" />
+
+
+            <MudSimpleTable style="@GetTableStyle()" Bordered="true">
+                <tbody>
+                    @{
+                        var unlockingItems = GetUnlockingItems();
+                    }
+                    @for (var y = MinY; y < GetMaxNumberY() + MinY; y++)
+                    {
+                        if (y < LandItems.Count)
+                        {
+
+                            if (y == MinY)
+                            {
+                                @for (var x = MinX; x < GetMaxNumberX() + MinX; x++)
+                                {
+                                    if (x < LandItems[y].Count)
+                                    {
+                                        if (x == MinX)
+                                        {
+                                            <td width="@GetWidthPositionCell()" class="positionCell positionCellHorizontal">&nbsp;</td>
+                                        }
+
+                                        <td width="@GetWidthPositionCell()" align="center" class="positionCell positionCellHorizontal">@string.Format($"x:{x}")</td>
+                                    }
+                                }
+
+                            }
+                            <tr>
+                                @for (var x = MinX; x < GetMaxNumberX() + MinX; x++)
+                                {
+                                    if (x < LandItems[y].Count)
+                                    {
+                                        if (x == MinX)
+                                        {
+                                            <td class="positionCell positionCellVertical">
+                                                @string.Format($"y:{y}")
+                                            </td>
+                                        }
+                                        var landItemsCell = LandItems[y][x].OrderBy(x => x.StackIndex).ToList();
+                                        <LandCell Zoom="Zoom" GameViewModel="GameViewModel" ReadOnly="ReadOnly" LandItems="landItemsCell" UnlockingItems="unlockingItems" />
+                                    }
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </MudSimpleTable>
+
+            <MudIconButton @ref="btnRight" Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" Style="height:200px" OnClick="() => ChangeMinX(1)" />
+        </MudStack>
+        <MudIconButton @ref="btnDown" Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown" Style="width:200px" OnClick="() => ChangeMinY(1)" />
+    </MudStack>
+
+</div>
+@code {
+    [Parameter] public List<List<List<LandItem>>> LandItems { get; set; }
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+    [Parameter] public List<LandItemNextTransformation> UnlockingItems { get; set; }
+    [Parameter] public bool ReadOnly { get; set; } = false;
+    [Parameter] public bool Zoom { get; set; } = true;
+    [Inject]
+    private IBrowserViewportService BrowserViewportService { get; set; }
+
+    private ElementReference keyDownDiv;
+    private MudIconButton btnUp;
+    private MudIconButton btnDown;
+    private MudIconButton btnRight;
+    private MudIconButton btnLeft;
+    public int MinX = 0;
+    public int MinY = 0;
+    public int MaxNumberX = 30;
+    public int MaxNumberY = 30;
+    private Breakpoint currentBreakPoint;
+
+    public int GetMaxNumberXZoomOutCurrentBreakPoint()
+    {
+        switch (currentBreakPoint)
+        {
+            case Breakpoint.Xs:
+                return 5;
+            case Breakpoint.Sm:
+                return 10;
+            case Breakpoint.Md:
+                return 14;
+            case Breakpoint.Lg:
+                return 16;
+            case Breakpoint.Xl:
+                return 24;
+            case Breakpoint.Xxl:
+                return 24;
+            case Breakpoint.SmAndDown:
+                return 5;
+            case Breakpoint.MdAndDown:
+                return 10;
+            case Breakpoint.LgAndDown:
+                return 14;
+            case Breakpoint.XlAndDown:
+                return 24;
+            case Breakpoint.SmAndUp:
+                return 10;
+            case Breakpoint.MdAndUp:
+                return 14;
+            case Breakpoint.LgAndUp:
+                return 16;
+            case Breakpoint.XlAndUp:
+                return 24;
+            case Breakpoint.None:
+                return 8;
+            case Breakpoint.Always:
+                return 8;
+        }
+        return 8;
+    }
+
+    public int GetMaxNumberXZoomInCurrentBreakPoint()
+    {
+        switch (currentBreakPoint)
+        {
+            case Breakpoint.Xs:
+                return 2;
+            case Breakpoint.Sm:
+                return 3;
+            case Breakpoint.Md:
+                return 6;
+            case Breakpoint.Lg:
+                return 9;
+            case Breakpoint.Xl:
+                return 11;
+            case Breakpoint.Xxl:
+                return 13;
+            case Breakpoint.SmAndDown:
+                return 2;
+            case Breakpoint.MdAndDown:
+                return 3;
+            case Breakpoint.LgAndDown:
+                return 6;
+            case Breakpoint.XlAndDown:
+                return 9;
+            case Breakpoint.SmAndUp:
+                return 3;
+            case Breakpoint.MdAndUp:
+                return 6;
+            case Breakpoint.LgAndUp:
+                return 9;
+            case Breakpoint.XlAndUp:
+                return 11;
+            case Breakpoint.None:
+                return 8;
+            case Breakpoint.Always:
+                return 8;
+        }
+        return 8;
+    }
+
+    public int GetMaxNumberYZoomInCurrentBreakPoint()
+    {
+        switch (currentBreakPoint)
+        {
+            case Breakpoint.Xs:
+                return 2;
+            case Breakpoint.Sm:
+                return 2;
+            case Breakpoint.Md:
+                return 3;
+            case Breakpoint.Lg:
+                return 4;
+            case Breakpoint.Xl:
+                return 5;
+            case Breakpoint.Xxl:
+                return 6;
+            case Breakpoint.SmAndDown:
+                return 2;
+            case Breakpoint.MdAndDown:
+                return 2;
+            case Breakpoint.LgAndDown:
+                return 3;
+            case Breakpoint.XlAndDown:
+                return 4;
+            case Breakpoint.SmAndUp:
+                return 5;
+            case Breakpoint.MdAndUp:
+                return 3;
+            case Breakpoint.LgAndUp:
+                return 4;
+            case Breakpoint.XlAndUp:
+                return 5;
+            case Breakpoint.None:
+                return 4;
+            case Breakpoint.Always:
+                return 4;
+        }
+        return 4;
+    }
+
+
+    public int GetMaxNumberYZoomOutCurrentBreakPoint()
+    {
+        switch (currentBreakPoint)
+        {
+            case Breakpoint.Xs:
+                return 6;
+            case Breakpoint.Sm:
+                return 6;
+            case Breakpoint.Md:
+                return 8;
+            case Breakpoint.Lg:
+                return 11;
+            case Breakpoint.Xl:
+                return 14;
+            case Breakpoint.Xxl:
+                return 17;
+            case Breakpoint.SmAndDown:
+                return 6;
+            case Breakpoint.MdAndDown:
+                return 6;
+            case Breakpoint.LgAndDown:
+                return 8;
+            case Breakpoint.XlAndDown:
+                return 11;
+            case Breakpoint.SmAndUp:
+                return 6;
+            case Breakpoint.MdAndUp:
+                return 8;
+            case Breakpoint.LgAndUp:
+                return 11;
+            case Breakpoint.XlAndUp:
+                return 14;
+            case Breakpoint.None:
+                return 4;
+            case Breakpoint.Always:
+                return 4;
+        }
+        return 4;
+    }
+    public int GetMaxNumberX()
+    {
+        if (Zoom) return GetMaxNumberXZoomOutCurrentBreakPoint();
+        return GetMaxNumberXZoomInCurrentBreakPoint();
+    }
+
+    public int GetMaxNumberY()
+    {
+        if (Zoom) return GetMaxNumberYZoomOutCurrentBreakPoint();
+        return GetMaxNumberYZoomInCurrentBreakPoint();
+    }
+
+    public void ResetMinXMinY()
+    {
+        MinX = 0;
+        MinY = 0;
+    }
+
+    public void SetMinXMinY(BigInteger x, BigInteger y)
+    {
+        MinX = (int)x;
+        MinY = (int)y;
+    }
+
+
+    public void ChangeMinX(int x)
+    {
+        var newMinX = MinX + x;
+        if(newMinX < 0) return;
+        if (x > 0 && (newMinX + GetMaxNumberX()) > LandItems[0].Count)
+        {   
+            return;
+        }
+        MinX = newMinX;
+    }
+
+    public void ChangeMinY(int y)
+    {
+        var newMinY = MinY + y;
+        if(newMinY < 0) return;
+        if(y > 0 && (newMinY + GetMaxNumberY()) > LandItems.Count) {   
+            return;
+        }
+        MinY = newMinY;
+    }
+
+    public ValueTask SetFocusAsync()
+    {
+        try
+        {
+            return keyDownDiv.FocusAsync();
+        }
+        catch
+        {
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    public List<LandItemNextTransformation> GetUnlockingItems()
+    {
+        if(GameViewModel != null && !ReadOnly)
+        {
+            return GameViewModel.GetAllNextTransformationsThatRequireUnlockingWithEnoughInventoryFromLocalState();
+        }
+
+        return new List<LandItemNextTransformation>();
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+        await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
+        
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public string GetWidthPositionCell()
+    {
+        if (Zoom)
+        {
+            return "48px";
+        }
+
+        return "136px";
+    }
+
+    public async Task KeyPress(KeyboardEventArgs e)
+    {
+        
+        if(e.Key == "ArrowRight"){
+            ChangeMinX(1);
+            try
+            {
+                await btnRight.FocusAsync();
+            }
+            catch
+            {
+                await SetFocusAsync();
+            }
+        }
+        if(e.Key == "ArrowLeft"){
+            ChangeMinX(-1);
+            try{
+            await btnLeft.FocusAsync();
+            }
+            catch
+            {
+                await SetFocusAsync();
+            }
+        }
+
+        if(e.Key == "ArrowUp"){
+            ChangeMinY(-1);
+            try{
+                    await btnUp.FocusAsync();
+                }
+                catch
+                {
+                    await SetFocusAsync();
+                }
+                
+         }
+        if(e.Key == "ArrowDown"){
+            ChangeMinY(1);
+            try{
+                    await btnDown.FocusAsync();
+                }
+                catch
+                {
+                    await SetFocusAsync();
+                }
+        }
+
+    }
+
+    public string GetTableStyle()
+    {
+       
+        if (Zoom)
+        {
+            var width = 70 * GetMaxNumberX() + 20;
+            return $"width:{width}px;overflow:scroll;background-color:transparent";
+            //return @$"width:{width}px;";
+
+
+        }
+        else
+        {
+            var width = 145 * GetMaxNumberX();
+            var height = 148 * GetMaxNumberY();
+            //return $"width:{width}px;overflow:scroll";
+            return $"width:{width}px;height:{height}px;overflow:scroll;background-color:transparent";
+
+        }
+    }
+
+    public async ValueTask DisposeAsync() => await BrowserViewportService.UnsubscribeAsync(this);
+
+    Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+    ResizeOptions IBrowserViewportObserver.ResizeOptions { get; } = new()
+        {
+            ReportRate = 500,
+            NotifyOnBreakpointOnly = true
+        };
+
+    Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        if(currentBreakPoint != browserViewportEventArgs.Breakpoint)
+        {
+            currentBreakPoint = browserViewportEventArgs.Breakpoint;
+            return InvokeAsync(StateHasChanged);
+        }
+
+        return Task.CompletedTask;
+    }
+
+
+}
