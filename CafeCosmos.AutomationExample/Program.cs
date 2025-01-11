@@ -68,7 +68,7 @@ namespace CafeCosmos.AutomationExample
             Console.WriteLine("---- Player Local State ----");
             Console.WriteLine($"Land XP: {playerLocalState.PlayerLandInfo.CumulativeXp}, Land Name: {playerLocalState.LandName}");
 
-            playerLocalState.PlaceItem(1, 1, DefaultItems.Furniture.GREEN_CHAIR.Id);
+           // playerLocalState.PlaceItem(1, 1, DefaultItems.Furniture.GREEN_CHAIR.Id);
             // Uncomment the line below to save the changes and interact with the blockchain
             //await playerService.SavePlayerStateAndWaitForReceiptAsync(playerLocalState);
         }
