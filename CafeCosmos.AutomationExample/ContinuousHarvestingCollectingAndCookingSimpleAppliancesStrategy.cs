@@ -8,8 +8,7 @@ using VisionsContracts.Items.Model;
 
 namespace CafeCosmos.AutomationExample
 {
-    internal partial class Program
-    {
+   
         //This requires that you have already crafted and placed the coffee machine and blender on your land
         public class ContinuousHarvestingCollectingAndCookingSimpleAppliancesStrategy
         {
@@ -30,7 +29,12 @@ namespace CafeCosmos.AutomationExample
                 CraftItemAndCookIfPossible(playerLocalState, DefaultCraftingRecipes.BlenderRecipes.SMOOTHIE, DefaultItems.Cooking.BLENDER);
                 CraftItemAndCookIfPossible(playerLocalState, DefaultCraftingRecipes.BlenderRecipes.BANANA_MILKSHAKE, DefaultItems.Cooking.BLENDER);
 
-            }
+                if (playerLocalState.UpdateLandOperations.Count > 0)
+                {
+                    await playerService.SavePlayerStateAndWaitForReceiptAsync(playerLocalState);
+                }
+
+        }
 
 
             private static void CraftItemAndCookIfPossible(PlayerLocalState playerLocalState, CraftingRecipe recipe, Item appliance)
@@ -86,5 +90,5 @@ namespace CafeCosmos.AutomationExample
 
 
 
-    }
+    
 }
