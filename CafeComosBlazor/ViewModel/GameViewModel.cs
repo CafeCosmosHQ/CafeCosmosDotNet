@@ -45,7 +45,7 @@ namespace CafeCosmosBlazor.ViewModel
         PlayerService playerService;
         public PlayerLocalState PlayerLocalState { get; set; }
         public PlayerInfo PlayerInfo { get; set; } = new PlayerInfo();
-        public List<FriendBalance> FriendBalances { get; set; } = new List<FriendBalance>();
+     
 
         public BigInteger SelectedChainId { get; set; }
 
@@ -243,20 +243,6 @@ namespace CafeCosmosBlazor.ViewModel
                 return playerService;
             }
             return null;
-        }
-
-        public async Task<List<FriendBalance>> GetFriendsBalancesAsync()
-        {
-            var friendsService = await GetFriendsServiceAsync();
-            FriendBalances = await friendsService.GetFriendsBalancesAsync();
-            return FriendBalances;
-        }
-
-        private async Task<FriendsService> GetFriendsServiceAsync()
-        {
-            var web3 = await SelectedHostProviderService.SelectedHost.GetWeb3Async();
-            var friendsService = new FriendsService(web3, await VisionsContractAddressesService.GetContractAddresses());
-            return friendsService;
         }
 
 

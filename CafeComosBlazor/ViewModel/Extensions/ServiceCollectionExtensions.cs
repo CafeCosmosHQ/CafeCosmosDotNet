@@ -6,7 +6,6 @@
         {
             serviceCollection.AddSingleton<GameViewModel>();
             serviceCollection.AddSingleton<LandPlayerViewModel>();
-            serviceCollection.AddSingleton<LandTestScenarioViewModel>();
             return serviceCollection;
         }
     }

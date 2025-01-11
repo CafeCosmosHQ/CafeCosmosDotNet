@@ -310,14 +310,7 @@
                                 }
                             </MudTabPanel>
                         }
-                        <MudTabPanel Icon="@Icons.Material.Filled.Scoreboard" ToolTip="Friends">
-                            @if (GameViewModel.IsLoaded())
-                            {
-                                <MudGrid Class="ml-5 pt-0 pl-0 pr-0 mr-0">
-                                    <Friends GameViewModel="GameViewModel"></Friends>
-                                </MudGrid>
-                            }
-                        </MudTabPanel>
+                        
 
 
                     </MudTabs>
@@ -386,10 +379,7 @@
     public async Task ActiveTabPanelChanged(int activeIndex)
     {
         mudTabsActiveIndex = activeIndex;
-        if (activeIndex == 3) // scoreboard navigation refresh
-        {
-            await GameViewModel.GetFriendsBalancesAsync();
-        }
+        
 
         if (activeIndex == 0)
         {
