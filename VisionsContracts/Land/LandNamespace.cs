@@ -130,8 +130,66 @@ namespace VisionsContracts.Land
         public async Task<List<LandItem>> GetLandItemsAsync(int landId, BlockParameter blockParameter = null)
         {
             var landInfo = await Systems.LandConfig.GetLandInfoQueryAsync(landId, blockParameter);
-            var land3d = await Systems.LandView.GetLandItems3dQueryAsync(landId, blockParameter);
-            return PadLandItems(ConvertLand3dToLandItemCollection(land3d.Land3d), landInfo.LandInfo.LimitX - 1, landInfo.LandInfo.LimitY - 1, landInfo.LandInfo.YBound);
+
+            var land = await FetchAllLandItemsAsync(landId);
+
+            //var landPage = await Systems.LandView.GetLandItems3dQueryAsync(landId, blockParameter);
+            return PadLandItems(ConvertLand3dToLandItemCollection(land), landInfo.LandInfo.LimitX - 1, landInfo.LandInfo.LimitY - 1, landInfo.LandInfo.YBound);
+        }
+
+        public async Task<List<List<List<LandItemDTO>>>> FetchAllLandItemsAsync(BigInteger landId, int initialMaxRange = 20)
+        {
+            var landPage = new List<List<List<LandItemDTO>>>();
+            var maxRange = initialMaxRange; // Initial max range
+            var startX = 0;
+
+            while (true)
+            {
+                var (result, adjustedMaxRange) = await FetchPagedLandItemsAsync(landId, startX, maxRange);
+
+                if (result == null || result.PagedLand3d.Count == 0)
+                {
+                    break; // Stop if no more data
+                }
+
+                landPage.AddRange(result.PagedLand3d);
+
+                // Persist the adjusted maxRange for subsequent calls
+                maxRange = adjustedMaxRange;
+
+                // If the result has fewer items than maxRange, we are at the end
+                if (result.PagedLand3d.Count < maxRange)
+                {
+                    break;
+                }
+
+                startX += result.PagedLand3d.Count; // Update start index
+            }
+
+            return landPage;
+        }
+
+        private async Task<(GetLandItems3dPagedOutputDTO? result, int adjustedMaxRange)> FetchPagedLandItemsAsync(BigInteger landId, int startX, int maxRange)
+        {
+            while (true)
+            {
+                try
+                {
+                    var result = await Systems.LandView.GetLandItems3dPagedQueryAsync(landId, startX, maxRange);
+                    return (result, maxRange); // Return the result and the current maxRange
+                }
+                catch (Exception ex)
+                {
+                    if (maxRange == 1)
+                    {
+                        throw; // Re-throw the exception if maxRange cannot be reduced further
+                    }
+
+                    // Adjust maxRange on failure
+                    maxRange = Math.Max(1, maxRange / 2);
+                    Console.WriteLine($"Error fetching data: {ex.Message}. Reducing maxRange to {maxRange}.");
+                }
+            }
         }
 
         public static List<LandItem> PadLandItems(List<LandItem> landItems)

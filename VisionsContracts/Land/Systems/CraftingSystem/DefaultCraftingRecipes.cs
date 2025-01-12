@@ -423,7 +423,7 @@ namespace VisionsContracts.Land.Systems.CraftingSystem
         {
             public static readonly CraftingRecipe BUCKET_EMPTY = new(new()
             {
-                new LBINT { 0, DefaultItems.Misc.WIRE.Id, 0 },
+                new LBINT { 0, 0, 0 },
                 new LBINT { RawMaterials.WOOD_PINK.Id, 0, RawMaterials.WOOD_PINK.Id },
                 new LBINT { 0, RawMaterials.WOOD_PINK.Id, 0 }
             }, DefaultItems.Buckets.BUCKET_EMPTY);

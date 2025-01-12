@@ -137,6 +137,21 @@ namespace VisionsContracts.Land.Systems.LandViewSystem
             return ContractHandler.QueryDeserializingToObjectAsync<GetLandItems3dFunction, GetLandItems3dOutputDTO>(getLandItems3dFunction, blockParameter);
         }
 
+        public virtual Task<GetLandItems3dPagedOutputDTO> GetLandItems3dPagedQueryAsync(GetLandItems3dPagedFunction getLandItems3dPagedFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetLandItems3dPagedFunction, GetLandItems3dPagedOutputDTO>(getLandItems3dPagedFunction, blockParameter);
+        }
+
+        public virtual Task<GetLandItems3dPagedOutputDTO> GetLandItems3dPagedQueryAsync(BigInteger landId, BigInteger startX, BigInteger maxRecords, BlockParameter blockParameter = null)
+        {
+            var getLandItems3dPagedFunction = new GetLandItems3dPagedFunction();
+                getLandItems3dPagedFunction.LandId = landId;
+                getLandItems3dPagedFunction.StartX = startX;
+                getLandItems3dPagedFunction.MaxRecords = maxRecords;
+            
+            return ContractHandler.QueryDeserializingToObjectAsync<GetLandItems3dPagedFunction, GetLandItems3dPagedOutputDTO>(getLandItems3dPagedFunction, blockParameter);
+        }
+
         public virtual Task<GetLandsTotalEarnedOutputDTO> GetLandsTotalEarnedQueryAsync(GetLandsTotalEarnedFunction getLandsTotalEarnedFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryDeserializingToObjectAsync<GetLandsTotalEarnedFunction, GetLandsTotalEarnedOutputDTO>(getLandsTotalEarnedFunction, blockParameter);
@@ -236,6 +251,7 @@ namespace VisionsContracts.Land.Systems.LandViewSystem
                 typeof(GetChairsOfTablesFunction),
                 typeof(GetLandItemsFunction),
                 typeof(GetLandItems3dFunction),
+                typeof(GetLandItems3dPagedFunction),
                 typeof(GetLandsTotalEarnedFunction),
                 typeof(GetPlacementTimeFunction),
                 typeof(GetRotationFunction),

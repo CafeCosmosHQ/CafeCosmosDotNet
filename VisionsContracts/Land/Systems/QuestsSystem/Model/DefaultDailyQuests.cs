@@ -33,11 +33,9 @@ namespace VisionsContracts.Land.Systems.QuestsSystem.Model
         {
             return new List<Reward>()
             {
-                DefaultRewards.RewardSoftToken25,
-                DefaultRewards.RewardSoftToken30,
-                DefaultRewards.RewardSoftToken35,
-                DefaultRewards.RewardSoftToken40,
-                DefaultRewards.RewardSoftToken45
+                DefaultRewards.RewardXP5,
+                DefaultRewards.RewardXP65,
+                DefaultRewards.RewardXP7,
             };
         }
 
