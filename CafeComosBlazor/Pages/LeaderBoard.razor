@@ -1,0 +1,26 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.Items.Model;
+<MudStack>
+    <MudDataGrid Class="mt-5" Items="@GameViewModel.LeaderBoard">
+    <Columns>
+       
+        <TemplateColumn Title="Land Name">
+            <CellTemplate>
+                <MudLink Href="@("landView/" + context.Item.LandId.ToString())">@context.Item.LandName</MudLink>
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="x => x.TotalEarned" Title="Total Earned" />
+    </Columns>
+</MudDataGrid>
+
+</MudStack>
+@code{
+
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+    
+
+    override protected async Task OnInitializedAsync()
+    {
+        await GameViewModel.RefreshLeaderBoardAsync();
+    }
+}

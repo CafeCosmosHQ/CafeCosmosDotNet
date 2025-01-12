@@ -1,4 +1,4 @@
-﻿@page "/landView/{playerAddress?}"
+﻿@page "/landView/{landId}"
 @using System.Reflection;
 @using System.Numerics;
 @using CafeCosmosBlazor.Services;
@@ -33,7 +33,7 @@
             <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center">
            
                 <MudItem xs="12" sm="6" md="4">
-                        <MudTextField Label="Player Address" Validation="@(new EthereumAddressAttribute() {ErrorMessage = "The address is not valid"})" @bind-Value="LandPlayerViewModel.PlayerAddress" Variant="Variant.Outlined"> </MudTextField>
+                        <MudTextField Label="Land Id" @bind-Value="LandPlayerViewModel.SelectedLandIndex" Variant="Variant.Outlined"> </MudTextField>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="4">
                     <AuthorizeView Roles="EthereumConnected">
@@ -63,15 +63,15 @@
 
 @code{
     [Parameter]
-    public string? PlayerAddress { get; set; }
+    public string landId { get; set; }
 
     bool isValid = false;
 
     protected override async Task OnInitializedAsync()
     {
-        if(PlayerAddress != null)
+        if (landId != null)
         {
-            LandPlayerViewModel.PlayerAddress = PlayerAddress;
+            LandPlayerViewModel.SelectedLandIndex = int.Parse(landId);
             await LandPlayerViewModel.ViewPlayerLand();
         }
     }

@@ -1,0 +1,117 @@
+﻿@page "/landtestscenario"
+@using System.Reflection;
+@using System.Numerics;
+@using CafeCosmosBlazor.Services;
+@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.CraftingSystem;
+@using VisionsContracts.CraftingSystem.Model;
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land;
+@using VisionsContracts.LandLocalState;
+@using VisionsContracts.TestScenarios;
+@using VisionsContracts.Transformations;
+@using VisionsContracts.Transformations.Model;
+@using Nethereum.UI.Validation.Attributes;
+@using Nethereum.Util;
+@inject SelectedEthereumHostProviderService selectedHostProviderService
+@inject IVisionsContractAddressesService visionsContractAddressesService;
+@inject NavigationManager NavigationManager
+
+<PageTitle>Land Test Scenario</PageTitle>
+
+@inject LandTestScenarioViewModel LandTestScenarioViewModel;
+
+
+<PageTitle>Cafe Cosmos - Land Test Scenario</PageTitle>
+
+<MudCard Class="ml-5 mt-5">
+    <MudCardContent>
+        <MudStack>
+            <MudGrid Justify="Justify.Center" Class="mt-1 pt-1">
+               
+                        <MudStack Row=true>
+
+                           <MudSelect Style="width:300px" FullWidth="true"  @bind-Value="LandTestScenarioViewModel.SelectedTestScenario" Class="ml-2" Label="Select Land Scenario to change">
+                                    @foreach (PlayerLocalStateTestScenarioFactory.LandScenario item in Enum.GetValues(typeof(PlayerLocalStateTestScenarioFactory.LandScenario)))
+                                    {
+                                        <MudSelectItem Value="@item">@item</MudSelectItem>
+                                    }
+                            </MudSelect>
+               
+                
+                           <MudButton Color="Color.Primary" Class="ml-5" Variant="Variant.Filled" @onclick="LandTestScenarioViewModel.SelectMockLand">Select Scenario</MudButton>
+              
+                
+                    <AuthorizeView Roles="EthereumConnected">
+                        <Authorized>
+                                    <MudButton Class="ml-5" Variant="Variant.Filled" Disabled="@(LandTestScenarioViewModel.InitialisingPlayerLand)" Color="Color.Primary" OnClick="LandTestScenarioViewModel.InitialisePlayerLandAsync">
+                                        @if (LandTestScenarioViewModel.InitialisingPlayerLand)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                            <MudText Class="ms-2">Saving..</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Change Land Scenario</MudText>
+                                        }
+
+                                    </MudButton>
+                            <MudButton Class="ml-5" Variant="Variant.Filled" Disabled="@(LandTestScenarioViewModel.InitialisingPlayerLand)" Color="Color.Primary" OnClick="LandTestScenarioViewModel.DepositDefaultTestingTokensToLandAsync">
+                                @if (LandTestScenarioViewModel.InitialisingPlayerLand)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Saving..</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Deposit Test tokens (To purchase land)</MudText>
+                                }
+
+                            </MudButton>
+
+                            <MudButton Class="ml-5" Variant="Variant.Filled" Disabled="@(LandTestScenarioViewModel.InitialisingPlayerLand)" Color="Color.Primary" OnClick="LandTestScenarioViewModel.MintAllInventoryItemsAsync">
+                                @if (LandTestScenarioViewModel.InitialisingPlayerLand)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Saving..</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Mint Test inventory items</MudText>
+                                }
+                            </MudButton>
+                                    
+                        </Authorized>
+                        <NotAuthorized>
+                                    <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled=true>Change Land Scenario (Not Connected)</MudButton>
+                        </NotAuthorized>
+                     </AuthorizeView>
+
+                      <MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="@(()=>NavigationManager.NavigateTo("", true))">Back to Game</MudButton>
+                </MudStack>
+        </MudGrid>
+        <MudGrid Justify="Justify.Center" Class="mt-1 pt-1">
+            @if (LandTestScenarioViewModel.LandItems != null && LandTestScenarioViewModel.LandItems.Count > 0)
+            {
+                   <Land ReadOnly="true" LandItems="LandTestScenarioViewModel.LandItems" />
+            }
+        </MudGrid>
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+
+
+
+@code{
+   
+    protected override async Task OnInitializedAsync()
+    {
+        LandTestScenarioViewModel.SelectedTestScenario = PlayerLocalStateTestScenarioFactory.LandScenario.StartLand;
+        if (LandTestScenarioViewModel.LandItems == null)
+        {
+            LandTestScenarioViewModel.SelectMockLand();
+        }
+      
+    }
+}

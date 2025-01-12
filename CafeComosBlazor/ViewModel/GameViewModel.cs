@@ -25,6 +25,7 @@ using VisionsContracts.Land.Systems.QuestsSystem.Model;
 using VisionsContracts.Land.Systems.LandQuestsSystem.Model;
 using VisionsContracts.PlayerBalancePurchasing;
 using System.Text;
+using VisionsContracts.LandNFTs.ContractDefinition;
 
 
 
@@ -45,7 +46,6 @@ namespace CafeCosmosBlazor.ViewModel
         PlayerService playerService;
         public PlayerLocalState PlayerLocalState { get; set; }
         public PlayerInfo PlayerInfo { get; set; } = new PlayerInfo();
-     
 
         public BigInteger SelectedChainId { get; set; }
 
@@ -238,11 +238,58 @@ namespace CafeCosmosBlazor.ViewModel
             {
                 
                 playerService = new PlayerService(web3, await VisionsContractAddressesService.GetContractAddresses(), address);
+                //edit to see other lands
+                //playerService.SelectedLandId = 5;
+                //
                 await playerService.EnsureInitialisedSelectedLandIdToFirstLandIfNotSetAsync();
                 
                 return playerService;
             }
             return null;
+        }
+
+        public async Task<GuildsAndPlayersEarnings> GetGuildsAndPlayersEarningsAsync()
+        {
+            var playerService = await GetPlayerServiceAsync();
+            return await playerService.GetGuildsAndPlayersEarningsAsync();
+        }
+
+        public async Task<List<LeaderBoardViewModel>> GetLeaderBoardOfTotalEarnedInOrderAsync()
+        {
+           var guildsAndPlayersEarnings = await GetGuildsAndPlayersEarningsAsync();
+           var lands = await GetAllLandsAsync(); 
+           var earningsInOrder = guildsAndPlayersEarnings.GetPlayersEarningsInOrder();
+           var returnList = new List<LeaderBoardViewModel>();
+            foreach (var player in earningsInOrder)
+            {
+                var land = lands.FirstOrDefault(x => x.LandId == player.LandId);
+                if (land != null)
+                {
+                    Console.WriteLine("Player: " + player.LandId + " " + player.TotalEarned);
+                    var leaderBoardViewModel = new LeaderBoardViewModel
+                    {
+                        LandId = player.LandId,
+                        TotalEarned = player.TokenEarnedToMainUnit(),
+                        LandName = land.Name
+                    };
+
+                    returnList.Add(leaderBoardViewModel);
+                }
+            }
+            return returnList;
+        }
+
+        public async Task RefreshLeaderBoardAsync()
+        {
+            LeaderBoard = await GetLeaderBoardOfTotalEarnedInOrderAsync();
+        }
+
+        public List<LeaderBoardViewModel> LeaderBoard { get; set; }
+
+        public async Task<List<LandMetadata>> GetAllLandsAsync()
+        {
+            var playerService = await GetPlayerServiceAsync();
+            return await playerService.GetAllLandsAsync();
         }
 
 

@@ -21,21 +21,33 @@ namespace CafeCosmosBlazor.ViewModel
         }
 
         public string PlayerAddress { get; set; }
-        public int SelectedLandIndex { get; set; }
+        public int? SelectedLandIndex { get; set; }
         public SelectedEthereumHostProviderService SelectedHostProviderService { get; }
         public IVisionsContractAddressesService VisionsContractAddressesService { get; }
 
         public async Task ViewPlayerLand()
         {
-            if (PlayerAddress != null && PlayerAddress.IsValidEthereumAddressHexFormat())
-            {
+            
                 LandItems = null;
                 var web3 = await SelectedHostProviderService.SelectedHost.GetWeb3Async();
                 var addresses = await VisionsContractAddressesService.GetContractAddresses();
+                if (SelectedLandIndex == null)
+                {
+                    if (PlayerAddress != null && PlayerAddress.IsValidEthereumAddressHexFormat())
+                    {
+                        var landId = await LandNamespace.GetFirstLandIdFromOwnerAsync(web3, PlayerAddress, addresses.LandNFTAddress);
+                        SelectedLandIndex = (int)landId;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+              
                 var landService = new LandNamespace(web3, addresses.LandAddress);
-                var landId = await LandNamespace.GetFirstLandIdFromOwnerAsync(web3, PlayerAddress, addresses.LandNFTAddress);
-                SelectedLandIndex = (int)landId;
-                var landItems = await landService.GetLandItemsAsync(SelectedLandIndex);
+               
+                var landItems = await landService.GetLandItemsAsync(SelectedLandIndex.Value);
                 if (landItems != null && landItems.Count > 0)
                 {
                     LandItems = LandNamespace.ConvertTo3dArray(LandNamespace.PadLandItems(landItems));
@@ -43,4 +55,4 @@ namespace CafeCosmosBlazor.ViewModel
             }
         }
     }
-}
+
