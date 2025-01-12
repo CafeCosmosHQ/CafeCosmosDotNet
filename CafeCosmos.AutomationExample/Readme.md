@@ -7,12 +7,13 @@ This program demonstrates how to work with data on **CafeCosmos** using **Nether
 The program interacts with Ethereum-based smart contracts to:
 
 1. Access player information and local state.
-2. Interact directly with MUD systems on the blockchain.
-3. Query blockchain tables for specific data.
-4. Process blockchain events for insights.
-5. Retrieve and manage data from a PostgreSQL database using repositories.
+2. Automation of common tasks like harvesting, crafting and cooking.
+3. Interact directly with MUD systems on the blockchain.
+4. Query blockchain tables for specific data.
+5. Process blockchain events for insights.
+6. Retrieve and manage data from a PostgreSQL database using repositories.
 
-### Dependency on MUD Tables Log Processor
+### Dependency on MUD Tables Log Processor for Example 6
 
 This program relies on the **MUD Tables Log Processor** to fetch and process log events from the blockchain and populate the PostgreSQL database (`storerecords` table). If the background processor is not running, you won't be able to run that sample :), so comment it out.
 
@@ -105,7 +106,89 @@ Console.WriteLine("Advanced local state operations completed and saved.");
 Console.WriteLine($"Previous Level: {previousLevel}, Current Level: {localState.PlayerLandInfo.LastLevelClaimed}");
 ```
 
-### 2. System-Level Interactions
+## 2. Automation Strategies
+
+### Continuous Harvesting, Collecting, and Cooking Using Simple Appliances
+
+This automation strategy demonstrates how to continuously interact with land appliances in **CafeCosmos**, such as coffee machines and blenders, to streamline gameplay. It automates the processes of collecting items, crafting recipes, cooking, and planting crops.
+
+#### Key Features
+
+1. **Automated Collection**: Automatically collects all ready-to-harvest items.
+2. **Continuous Crafting and Cooking**: Crafts and places items on appliances for further processing.
+3. **Smart Inventory Management**: Ensures efficient use of resources by checking recipe requirements and inventory.
+4. **Crop Management**: Automates planting and watering seeds.
+
+#### Code Overview
+
+```csharp
+public class ContinuousHarvestingCollectingAndCookingSimpleAppliancesStrategy
+{
+    public async Task ExecuteAsync(Web3 web3, VisionsContractAddresses contractAddresses)
+    {
+        var playerService = new PlayerService(web3, contractAddresses, web3.TransactionManager.Account.Address);
+
+        // Ensure we get the landId of the user
+        await playerService.EnsureInitialisedSelectedLandIdToFirstLandIfNotSetAsync();
+        var playerLocalState = await playerService.GetNewPlayerLocalStateAsync();
+
+        // Step 1: Collect all ready-to-harvest items
+        CollectAllItemsReadyToCollect(playerLocalState);
+
+        // Step 2: Craft and cook recipes if possible
+        CraftItemAndCookIfPossible(playerLocalState, DefaultCraftingRecipes.CoffeeMachineRecipes.COFFEE, DefaultItems.Cooking.COFFEE_MACHINE);
+        
+        // Alternate between smoothie and milkshake
+        var smoothie = true;
+        if (smoothie)
+        {
+            CraftItemAndCookIfPossible(playerLocalState, DefaultCraftingRecipes.BlenderRecipes.SMOOTHIE, DefaultItems.Cooking.BLENDER);
+        }
+        else
+        {
+            CraftItemAndCookIfPossible(playerLocalState, DefaultCraftingRecipes.BlenderRecipes.BANANA_MILKSHAKE, DefaultItems.Cooking.BLENDER);
+        }
+
+        // Step 3: Plant seeds and water them
+        for (int i = 0; i < 10; i++)
+        {
+            PlaceItemOnAnother(playerLocalState, DefaultItems.Wheat.WHEAT_SEED, DefaultItems.Gardening.TILLED_SOIL);
+            PlaceItemOnAnother(playerLocalState, DefaultItems.Tools.WATERING_CAN, DefaultItems.Wheat.WHEAT_SEED);
+        }
+
+        // Step 4: Save changes if required
+        if (playerLocalState.UpdateLandOperations.Count > 0)
+        {
+            await playerService.SavePlayerStateAndWaitForReceiptAsync(playerLocalState);
+        }
+    }
+
+    private static void CollectAllItemsReadyToCollect(PlayerLocalState playerLocalState) { ... }
+    private static void CraftItemAndCookIfPossible(PlayerLocalState playerLocalState, CraftingRecipe recipe, Item appliance) { ... }
+    private static void PlaceItemOnAnother(PlayerLocalState playerLocalState, Item item, Item appliance) { ... }
+}
+```
+
+#### How to Use
+
+1. Ensure the following appliances are crafted and placed on your land:
+   - Coffee Machine
+   - Blender
+   - Oven
+2. Execute the automation strategy:
+   ```csharp
+   var strategy = new ContinuousHarvestingCollectingAndCookingSimpleAppliancesStrategy();
+   await strategy.ExecuteAsync(web3, contractAddresses);
+   ```
+3. Monitor the logs to track harvesting, crafting, and cooking actions.
+
+#### Additional Notes
+
+- This strategy assumes a simple setup with predefined recipes and appliances.
+- You can extend the logic to include more advanced recipes or other appliances.
+- Save operations are performed only when there are changes to the land state to optimize blockchain interactions.
+
+### 3. System-Level Interactions
 
 Access systems directly to fetch or manipulate data. For example, retrieving player earnings from the `LandView` system:
 
@@ -114,7 +197,7 @@ var landNamespace = new LandNamespace(web3, worldAddress);
 var totalEarned = await landNamespace.Systems.LandView.GetPlayerTotalEarnedAsync(1);
 ```
 
-### 3. Interacting with Blockchain Tables
+### 4. Interacting with Blockchain Tables
 
 Query tables stored on the blockchain, such as the `PlayerTotalEarned` table:
 
@@ -127,7 +210,7 @@ foreach (var record in allTotalEarned)
 }
 ```
 
-### 4. Processing Blockchain Events
+### 5. Processing Blockchain Events
 
 Retrieve and process blockchain events, such as land purchases or creations:
 
@@ -143,7 +226,7 @@ foreach (var purchase in allPurchases)
 }
 ```
 
-### 5. Using the PostgreSQL Repository
+### 6. Using the PostgreSQL Repository
 
 Retrieve data stored in the PostgreSQL database, such as transformations:
 
