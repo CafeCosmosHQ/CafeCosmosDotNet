@@ -1,4 +1,4 @@
-﻿#if !LIVE
+﻿
 using CafeCosmosBlazor.Services;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.UI;
@@ -152,4 +152,4 @@ namespace CafeCosmosBlazor.ViewModel
         }
     }
 }
-#endif
+
