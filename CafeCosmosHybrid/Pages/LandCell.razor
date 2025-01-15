@@ -1,0 +1,413 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using System.Numerics;
+@using System.Net;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Items;
+@using VisionsContracts.Land;
+@using VisionsContracts.Land.Model;
+@using VisionsContracts.LandLocalState;
+@using VisionsContracts.Transformations.Model;
+@using VisionsContracts.Transformations;
+
+<style>
+    .imgRotate {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    }
+</style>
+@if (GetLastItem() != null)
+{
+    var landItem = GetLastItem();
+    var item = GetItem(landItem.ItemId);
+
+
+    <td style="padding:0px;@GetCellStyle()">
+
+        @if (Zoom)
+        {
+            <MudButton Class="m-0 p-0" Style="height:40px;width:40px" FullWidth="true" OnClick="() => {if(GameViewModel!=null && GameViewModel.EnablePerformActionFromCell)GameViewModel?.PerformActionLandItem(landItem);}">
+                <MudImage Src="@GetImage(landItem.ItemId)" Class="@GetClassImageRotate(landItem)" Height="40" />
+            </MudButton>
+        }
+        else
+        {
+
+
+
+
+            <MudCard Elevation="0" Style="@GetCellStyle()">
+                <MudCardContent Class="m-0 p-0" Style="padding:0px">
+
+                    <MudStack Row="false" AlignItems="AlignItems.Center" Spacing="0">
+
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Style="width:136px">
+                            <MudText Align="Align.Center" Style="width:100%;height:20px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;font-weight:bold" Typo="Typo.caption">@GetItemName(landItem.ItemId)</MudText>
+                            @if (landItem.PlacementTime < 0)
+                            {
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Save" />
+                            }
+
+                            <MudTooltip Arrow="true">
+                                <ChildContent>
+                                    <MudIcon Style="font-size: 1rem; color:gray" Icon="@Icons.Material.Outlined.Info" />
+                                </ChildContent>
+                                <TooltipContent> 
+                                    <MudStack Spacing="0">
+                                        @for (var z1 = 0; z1 < LandItems.Count; z1++)
+                                        {
+                                            var landItem1 = LandItems[z1];
+                                            <MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
+                                                <MudImage Height="20" Src="@GetImage(landItem1.ItemId)"></MudImage>
+                                                <MudText>@GetItemName(landItem1.ItemId)</MudText>
+                                            </MudStack>
+                                        }
+
+                                    </MudStack>
+
+                                    @if (item != null)
+                                    {
+                                        @if (item.IsRotatable)
+                                        {
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.RotateLeft" />
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.Check" />
+                                            </MudStack>
+                                        }
+
+                                        @if (item.IsRemovable)
+                                        {
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.Remove" />
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.Check" />
+                                            </MudStack>
+                                        }
+
+                                        @if (item.IsCookingState)
+                                        {
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.Kitchen" />
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.Check" />
+                                            </MudStack>
+                                        }
+                                    }
+                                    <MudStack Spacing="0">
+                                        @foreach(var transformation in GetAllTransformations())
+                                        {
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                                @if (item != null && item.IsCookingState)
+                                                {
+                                                    <MudImage Src="@GetActionImage(transformation.Input)" Height="25" />
+                                                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.ArrowCircleRight" />
+                                                    @if(transformation.UnlockTime > 0){
+                                                        @string.Format(transformation.UnlockTime + "s");
+                                                    }
+                                                    <MudImage Src="images/icons/token_icon.png" Height="25" />
+                                                }
+                                                else if (transformation.Yield == 0)
+                                                {
+                                                    <MudImage Src="@GetActionImage(transformation.Input)" Height="25" />
+                                                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.ArrowCircleRight" />
+                                                    @if (transformation.UnlockTime > 0)
+                                                    {
+                                                        @string.Format(transformation.UnlockTime + "s");
+
+                                                    }
+                                                    <MudImage Src="@GetImage(transformation.Next)" Height="25" />
+                                                }
+                                                else
+                                                {
+                                                    <MudImage Src="@GetActionImage(transformation.Input)" Height="25" />
+                                                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.ArrowCircleRight" />
+                                                    @if (transformation.UnlockTime > 0)
+                                                    {
+                                                        @string.Format(transformation.UnlockTime + "s")
+                                                        ;
+
+                                                    }
+                                                    <MudImage Src="@GetImage(transformation.Yield)" Height="25" />
+
+                                                }
+                                            </MudStack>
+                                        }
+
+                                        @foreach (var stacking in GetAllStackings())
+                                        {
+
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.PinDrop" />
+                                                <MudImage Src="@GetActionImage(stacking.Input)" Height="25" />
+                                            </MudStack>
+                                        }
+
+
+                                        @foreach (var placeableItem in GetAllPlaceableItems())
+                                        {
+
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.PinDrop" />
+                                                <MudImage Src="@GetActionImage(placeableItem.Id)" Height="25" />
+                                            </MudStack>
+                                        }
+
+
+
+                                    </MudStack> 
+                                </TooltipContent>
+                            </MudTooltip> 
+
+                        </MudStack>
+
+                        @if (ReadOnly)
+                        {
+
+                            <MudButton Class="m-0 p-0" Style="height:80px;width:136px" FullWidth="true">
+                                <MudImage Src="@GetImage(landItem.ItemId)" Class="@GetClassImageRotate(landItem)" Height="80" />
+                            </MudButton>
+
+                        }
+                        else
+                        {
+                            <MudButton Class="m-0 p-0" Style="height:80px;width:136px" FullWidth="true" OnClick="() => {if(GameViewModel.EnablePerformActionFromCell)GameViewModel.PerformActionLandItem(landItem);}">
+                                <MudImage Src="@GetImage(landItem.ItemId)" Class="@GetClassImageRotate(landItem)" Height="80" />
+                            </MudButton>
+                        }
+                    </MudStack>
+                </MudCardContent>
+
+                <MudCardActions Class="m-0 p-0">
+
+                    <MudStack Row="false" Spacing="0">
+                        @*  <MudText Align="Align.Center" Style="width:130px;height:20px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;" Typo="Typo.caption">@GetItemName(landItem.ItemId)</MudText> *@
+                        <MudStack Justify="Justify.SpaceEvenly" AlignItems="AlignItems.End" Row="true" Spacing="0" Style="height:20px;">
+                            @{
+                                var nextTranformation = GetNextTransformation();
+                            }
+                            @if (nextTranformation != null && landItem.PlacementTime > 0)
+
+                            {
+                                var timeToUnlock = unlockTimeoutValidator.GetRemainingSecondsToUnlock(nextTranformation);
+                                if (landItem.X == 5 && landItem.Y == 0)
+                                {
+                                    Console.WriteLine("x:" + landItem.X + "y:" + landItem.Y);
+                                    Console.WriteLine(nextTranformation.LandItem.PlacementTime);
+                                    Console.WriteLine(((UnlockTimeoutValidator)unlockTimeoutValidator).GetUnlockDuration(nextTranformation));
+                                    Console.WriteLine(timeToUnlock);
+                                }
+
+                                    var hasTimeOut = nextTranformation.Transformation.Timeout != 0;
+                                    var timeToTimeOut = unlockTimeoutValidator.GetRemainingSecondsToTimedOut(nextTranformation);
+
+
+
+                                    if (timeToUnlock < 0) timeToUnlock = 0;
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Justify="Justify.SpaceEvenly" Class="m-0 p-0">
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.LockClock" />
+                                        @if (timeToUnlock > 0 || (timeToUnlock == 0 && !hasTimeOut))
+                                        {
+                                            <MudText Class="pl-1" Typo="Typo.body2">@Math.Round(timeToUnlock)</MudText>
+                                        }
+                                        else if (timeToTimeOut > 0)
+                                        {
+                                            <MudText Class="pl-1" Typo="Typo.subtitle2" Color="Color.Warning">@Math.Round(timeToTimeOut)</MudText>
+                                        }
+                                        else if (timeToTimeOut < 0)
+                                        {
+                                            <MudText Class="pl-1" Typo="Typo.subtitle2" Color="Color.Error">@Math.Round(timeToTimeOut)</MudText>
+                                        }
+
+                                        @{
+
+                                            if (item != null && item.IsCookingState)
+                                            {
+                                                <MudImage Src="@GetActionImage(nextTranformation.Transformation.Input)" Height="25" />
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.ArrowCircleRight" />
+                                                <MudImage Src="images/icons/token_icon.png" Height="25" />
+                                            }
+                                            else if (nextTranformation.Transformation.Yield == 0)
+                                            {
+                                                <MudImage Src="@GetActionImage(nextTranformation.Transformation.Input)" Height="25" />
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.ArrowCircleRight" />
+                                                <MudImage Src="@GetImage(nextTranformation.Transformation.Next)" Height="25" />
+                                            }
+                                            else
+                                            {
+                                                <MudImage Src="@GetActionImage(nextTranformation.Transformation.Input)" Height="25" />
+                                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Outlined.ArrowCircleRight" />
+                                                <MudImage Src="@GetImage(nextTranformation.Transformation.Yield)" Height="25" />
+
+                                            }
+                                        }
+                                    </MudStack>
+                                }
+                                @*
+                    @if (landItem.PlacementTime < 0)
+                    {
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Save" />
+                    } *@
+                            </MudStack>
+                        </MudStack>
+                    
+                </MudCardActions>
+            </MudCard>
+             
+            @*  </ActivatorContent>
+    <ChildContent>
+    <MudMenuItem>@GetItemName(landItem.ItemId)</MudMenuItem>
+    <MudMenuItem>Copy</MudMenuItem>
+    <MudMenuItem>Paste</MudMenuItem>
+    <MudMenuItem>Delete</MudMenuItem>
+    </ChildContent>
+    </MudMenu> *@
+        }
+
+    
+
+        
+       </td>
+}
+
+@code {
+    [Parameter] public List<LandItem> LandItems { get; set; }
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+    [Parameter] public List<LandItemNextTransformation> UnlockingItems { get; set; }
+    IUnlockTimeoutValidator unlockTimeoutValidator = new UnlockTimeoutValidator();
+    [Parameter] public bool ReadOnly { get; set; } = false;
+    [Parameter] public bool Zoom { get; set; } = true;
+
+    public void ContextMenuOpen(bool isOpen) {
+
+        if (GameViewModel != null)
+        {
+            GameViewModel.EnablePerformActionFromCell = !isOpen;
+        }
+    }
+
+    public LandItem GetLastItem()
+    {
+        if (LandItems == null || LandItems.Count == 0) return null;
+        return LandItems.Last();
+    }
+
+    public LandItemNextTransformation GetNextTransformation()
+    {
+        if(UnlockingItems != null)
+        {
+            var lastItem = GetLastItem();
+
+            if (lastItem != null)
+            {
+                return UnlockingItems.FirstOrDefault(x => x.LandItem == lastItem);
+            }
+        }
+        return null;
+    }
+
+    public List<Transformation> GetAllTransformations()
+    {
+        var lastItem = GetLastItem();
+        if (lastItem != null)
+        {
+            return DefaultTransformations.GetAllTransformations().Where(x => x.Base == lastItem.ItemId).ToList();
+        }
+
+        return new List<Transformation>();
+    }
+
+    public List<Stacking> GetAllStackings()
+    {
+
+        var lastItem = GetLastItem();
+        if (lastItem != null)
+        {
+            var stackableItems =  DefaultStackings.GetAllStackableItems().Where(x => x.Base == lastItem.ItemId).ToList();
+            return stackableItems;
+        }
+
+        return new List<Stacking>();
+    }
+
+
+    public List<Item> GetAllPlaceableItems()
+    {
+
+        var lastItem = GetLastItem();
+        if (lastItem == null || lastItem.ItemId == 0)
+        {
+            var items = DefaultItems.GetAllPlaceableItems().ToList();
+            return items;
+        }
+
+        return new List<Item>();
+    }
+
+    public string GetCellStyle()
+    {
+        if(Zoom)
+        {
+            return "height: 48px; width: 48px;" + GetCellStyle(LandItems.FirstOrDefault().ItemId);
+        }
+        else
+        {
+            return "height: 136px; width: 136px;" + GetCellStyle(LandItems.FirstOrDefault().ItemId);
+        }
+
+    }
+
+    public string GetCellStyle(BigInteger itemId)
+    {
+        if (DefaultItems.Decorations.PINK_FLOOR.Id == itemId)
+        {
+            return "background-color:lightpink";
+        }
+
+        if (DefaultItems.Decorations.PURPLE_FLOOR.Id == itemId)
+        {
+            return "background-color:mediumpurple";
+        }
+
+        return "background-color:white";
+    }
+
+    private Item GetItem(BigInteger id)
+    {
+        return DefaultItems.FindItemById(id);
+
+    }
+
+    private string GetItemName(BigInteger id)
+    {
+        if (id == -1) return "Concealed";
+        var item = DefaultItems.FindItemById(id);
+        
+        if (item == null) return "Grass";
+        return item.Name;
+    }
+
+    private string GetActionImage(BigInteger itemId)
+    {
+        if (itemId == 0) return GetImage(DefaultItems.Tools.HAND.Id);
+        return GetImage(itemId);
+    }
+
+    private string GetClassImageRotate(LandItem landItem)
+    {
+        if (landItem == null) return "";
+        if (landItem.IsRotated) return "imgRotate";
+        return "";
+    }
+
+
+
+    private string GetImage(BigInteger itemId)
+    {
+        if (itemId == 0) return "images/icons/block_of_land.png";
+        if (itemId == -1) return "images/icons/block_of_land_dark.png";
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == itemId);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+}

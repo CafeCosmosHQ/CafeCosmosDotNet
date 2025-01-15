@@ -1,0 +1,442 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.CraftingSystem.Model;
+@using VisionsContracts.CraftingSystem;
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land.Systems.CraftingSystem
+@using VisionsContracts.Land.Systems.CraftingSystem.Model;
+
+<MudPaper Class="mt-5">
+<MudCard >
+    <MudCardContent>
+        <MudText Typo="Typo.h6">Find crafting recipe that can be created with current inventory items</MudText>
+         <MudStack Row="true" AlignItems="AlignItems.Center">
+            @if (foundRecipeFromInventoryItems != null)
+            {
+                <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(foundRecipeFromInventoryItems.Output)" Size="Size.Medium" />
+            }
+            <MudAutocomplete T="CraftingRecipe" MaxItems="1000"
+                             Label="Enter the name of the output to find the recipe" @bind-Value="foundRecipeFromInventoryItems"
+                             SearchFunc="@SearchCraftingRecipeByNameFromInventoryItems" ToStringFunc="@(e=> e==null?null : $"{e.Output.Name} ({e.Output.Category}) ({GetNumberOfItemsInventory(e.Output)})")">
+               
+                                    <ItemTemplate Context="e">
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e.Output)" Size="Size.Medium" />
+                                                    <MudText Typo="Typo.body2">
+                                                        @($" {e.Output.Name} ({e.Output.Category}) ({GetNumberOfItemsInventory(e.Output)})")
+                                                    </MudText>
+                                                </MudStack>
+                                       </ItemTemplate>
+                                
+                            
+             </MudAutocomplete>
+        </MudStack>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="SelectFoundRecipeFromInventoryItems">Select</MudButton>
+    </MudCardActions>
+</MudCard>
+
+<MudCard Class="mt-5">
+    <MudCardContent>
+        <MudText Typo="Typo.h6">Find any crafting recipe that can be created</MudText>
+         <MudStack Row="true" AlignItems="AlignItems.Center">
+        @if (foundRecipe != null)
+        {
+            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(foundRecipe.Output)" Size="Size.Medium" />
+        }
+        <MudAutocomplete T="CraftingRecipe" MaxItems="1000"
+                         Label="Enter the name of the output to find the recipe" @bind-Value="foundRecipe"
+                             SearchFunc="@SearchCraftingRecipeByName" ToStringFunc="@(e=> e==null?null : $"{e.Output.Name} ({e.Output.Category}) ({GetNumberOfItemsInventory(e.Output)})")">
+
+            <ItemTemplate Context="e">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e.Output)" Size="Size.Medium" />
+                    <MudText Typo="Typo.body2">
+                        @($" {e.Output.Name} ({e.Output.Category}) ({GetNumberOfItemsInventory(e.Output)})")
+                    </MudText>
+                </MudStack>
+            </ItemTemplate>
+
+        </MudAutocomplete>
+        </MudStack>
+     
+
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="SelectFoundRecipe">Select</MudButton>
+    </MudCardActions>
+</MudCard>
+
+<MudCard Class="mt-16">
+    <MudCardContent>
+        <MudText Typo="Typo.h5">Craft or view crafting recipe</MudText>
+        <table width="100%">
+            <tr>
+                <td>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                    @if (row0col0 != null)
+                    {
+                        <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row0col0)" Size="Size.Medium" />
+                    }
+                    <MudAutocomplete T="Item" 
+                                     Label="Row0Col0" @bind-Value="row0col0" MaxItems="1000"
+                                     SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")" >
+                                        <ItemTemplate Context="e">
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                                <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                                <MudText Typo="Typo.body2">
+                                                 @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                                </MudText>
+                                            </MudStack>
+                                           </ItemTemplate>
+                                     </MudAutocomplete>
+                    </MudStack>
+                </td>
+                <td>
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row0col1 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row0col1)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row0Col1" @bind-Value="row0col1" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+                   
+                </td>
+                <td>
+                   
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row0col2 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row0col2)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row0Col2" @bind-Value="row0col2" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                   
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row1col0 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row1col0)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row1Col0" @bind-Value="row1col0" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+
+                </td>
+                <td>
+                      <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row1col1 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row1col1)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row1Col1" @bind-Value="row1col1" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+
+                </td>
+                <td>
+                   
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row1col2 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row1col2)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row1Col2" @bind-Value="row1col2" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row2col0 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row2col0)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row2Col0" @bind-Value="row2col0" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+
+                </td>
+                <td>
+                  
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row2col1 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row2col1)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row2Col1" @bind-Value="row2col1" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+
+                </td>
+                <td>
+                   
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        @if (row2col2 != null)
+                        {
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(row2col2)" Size="Size.Medium" />
+                        }
+                        <MudAutocomplete T="Item"
+                                         Label="Row2Col2" @bind-Value="row2col2" MaxItems="1000"
+                                         SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)})")">
+                            <ItemTemplate Context="e">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e)" Size="Size.Medium" />
+                                    <MudText Typo="Typo.body2">
+                                        @($" {e.Name} ({e.Category}) ({GetNumberOfItemsInventory(e)}) ")
+                                    </MudText>
+                                </MudStack>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudStack>
+
+                </td>
+            </tr>
+        </table>
+
+        @if (output != null)
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudText>Output:</MudText>
+                <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(output)" Size="Size.Medium" />
+                <MudText>@output.Name (@GetNumberOfItemsInventory(output))</MudText>
+          </MudStack>
+        }
+
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="CraftRecipe">Craft Recipe</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="FindMatchingCraftingRecipe">Find Matching Recipe</MudButton>
+    </MudCardActions>
+</MudCard>
+</MudPaper>
+@if(!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Class="mt-5" Severity="Severity.Error" Square="true" ShowCloseIcon="true" CloseIconClicked="(() => errorMessage = String.Empty)">@errorMessage</MudAlert>
+}
+
+@code {
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+    private Item row0col0, row0col1, row0col2,
+                row1col0, row1col1, row1col2,
+                row2col0, row2col1, row2col2,
+                output;
+
+    private CraftingRecipe foundRecipe;
+    private CraftingRecipe foundRecipeFromInventoryItems;
+
+    private string errorMessage;
+
+    private async Task<IEnumerable<Item>> SearchItemByName(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return DefaultItems.GetAllItems();
+        if (value == "0") return new List<Item>(
+                new[] { new Item("0 Empty", 0, ItemCategory.NotDefined, false, false, false, false, false) });
+        return DefaultItems.FindItemsByName(value);
+    }
+
+  
+
+    private async Task<IEnumerable<CraftingRecipe>> SearchCraftingRecipeByNameFromInventoryItems(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return GameViewModel.GetCraftingRecipesThatCanBeCreatedWithCurrentInventoryItems();
+        var results = GameViewModel.GetCraftingRecipesThatCanBeCreatedWithCurrentInventoryItems().Where(x => x.Output.Name.ToLower().Contains(value.ToLower()));
+        return results;
+    }
+
+    private async Task<IEnumerable<CraftingRecipe>> SearchCraftingRecipeByName(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return DefaultCraftingRecipes.GetAllCraftingRecipes();
+        var results = DefaultCraftingRecipes.GetAllCraftingRecipes().Where(x => x.Output.Name.ToLower().Contains(value.ToLower()));
+        return results;
+    }
+
+   
+
+    public void SelectFoundRecipe(CraftingRecipe foundRecipe)
+    {
+        errorMessage = null;
+        if (foundRecipe != null)
+        {
+            this.row0col0 = DefaultItems.FindItemById(foundRecipe.Recipe[0][0]);
+            this.row0col1 = DefaultItems.FindItemById(foundRecipe.Recipe[0][1]);
+            this.row0col2 = DefaultItems.FindItemById(foundRecipe.Recipe[0][2]);
+            this.row1col0 = DefaultItems.FindItemById(foundRecipe.Recipe[1][0]);
+            this.row1col1 = DefaultItems.FindItemById(foundRecipe.Recipe[1][1]);
+            this.row1col2 = DefaultItems.FindItemById(foundRecipe.Recipe[1][2]);
+            this.row2col0 = DefaultItems.FindItemById(foundRecipe.Recipe[2][0]);
+            this.row2col1 = DefaultItems.FindItemById(foundRecipe.Recipe[2][1]);
+            this.row2col2 = DefaultItems.FindItemById(foundRecipe.Recipe[2][2]);
+            this.output = foundRecipe.Output;
+            this.errorMessage = string.Empty;
+        }
+        else
+        {
+            this.errorMessage = "Crafting recipe not found";
+        }
+    }
+
+    public void SelectFoundRecipe()
+    {
+        SelectFoundRecipe(this.foundRecipe);
+        this.foundRecipe = null;
+    }
+
+    public void SelectFoundRecipeFromInventoryItems()
+    {
+        SelectFoundRecipe(this.foundRecipeFromInventoryItems);
+        this.foundRecipeFromInventoryItems = null;
+    }
+
+    private int GetId(Item item)
+    {
+        if (item == null) return 0;
+        return item.Id;
+    }
+
+    public void CraftRecipe()
+    {
+        errorMessage = null;
+        var foundRecipe = DefaultCraftingRecipes.FindCraftingRecipe(new[]
+           {
+                 new [] { GetId(row0col0), GetId(row0col1), GetId(row0col2) },
+                 new [] { GetId(row1col0), GetId(row1col1), GetId(row1col2) },
+                 new [] { GetId(row2col0), GetId(row2col1), GetId(row2col2) }
+    }
+       );
+
+        if (GameViewModel.IsCraftingRecipeValidWithCurrentInventoryItems(foundRecipe))
+        {
+            GameViewModel.CraftRecipeIntoLocalState(foundRecipe);
+        }
+        else
+        {
+            errorMessage = "This recipe cannot be crafted with current inventory items";
+        }
+    }
+
+    private string GetImage(Item item)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == item.Id);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+    public void FindMatchingCraftingRecipe()
+    {
+        errorMessage = null;
+        var foundRecipe = DefaultCraftingRecipes.FindCraftingRecipe(new[]
+            {
+                 new [] { GetId(row0col0), GetId(row0col1), GetId(row0col2) },
+                 new [] { GetId(row1col0), GetId(row1col1), GetId(row1col2) },
+                 new [] { GetId(row2col0), GetId(row2col1), GetId(row2col2) }
+    }
+        );
+
+        if (foundRecipe != null)
+        {
+            output = foundRecipe.Output;
+            if (!GameViewModel.IsCraftingRecipeValidWithCurrentInventoryItems(foundRecipe))
+            {
+                errorMessage = "Recipe Found, but there are not enough items to craft this recipe";
+            }
+        }
+        else
+        {
+            errorMessage = "Recipe does not exist";
+        }
+
+
+    }
+
+    public int GetNumberOfItemsInventory(Item item)
+    {
+        var foundItem = GameViewModel.GetInventoryItemsFromPlayerLocalState().FirstOrDefault(x => x.ItemId == item.Id);
+        if (foundItem == null) return 0;
+        return (int)foundItem.Count;
+    }
+
+}

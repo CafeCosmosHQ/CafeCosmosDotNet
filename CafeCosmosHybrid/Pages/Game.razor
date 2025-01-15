@@ -1,0 +1,620 @@
+﻿@page "/"
+@using System.Reflection;
+@using System.Numerics;
+@using CafeCosmosBlazor.Services;
+@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.CraftingSystem;
+@using VisionsContracts.CraftingSystem.Model;
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land;
+@using VisionsContracts.LandLocalState;
+@using VisionsContracts.TestScenarios;
+@using VisionsContracts.Transformations;
+@using VisionsContracts.Transformations.Model;
+@using Nethereum.UI.Validation.Attributes;
+@using VisionsContracts;
+@inject SelectedEthereumHostProviderService selectedHostProviderService
+@inject GameViewModel GameViewModel;
+@inject ISnackbar Snackbar;
+@inject IDialogService DialogService
+@inject IVisionsContractAddressesService visionsContractAddressService;
+
+@implements IDisposable
+
+<PageTitle>Cafe Cosmos</PageTitle>
+
+<AuthorizeView Roles="EthereumConnected">
+    <Authorized>
+        @if (GameViewModel.SelectedChainId != visionsContractAddressService.GetChainId())
+        {
+
+            if(selectedHostProviderService.SelectedHost is MetamaskHostProvider)
+            {
+                <MudGrid Justify="Justify.Center" Class="ma-5">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5">Invalid Chain</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudImage Src="images/favicon256x256.png" Width="32" Height="32" Alt="Cafe Cosmos" Elevation="25" Class="rounded-lg mr-5" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+
+                            <MudGrid Justify="Justify.Center" Class="mt-5 mb-5">
+
+                                <MudStack Class="pa-2" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudText Typo="Typo.body2">Invalid chain, please change the selected chain to @visionsContractAddressService.GetChainName()</MudText>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GameViewModel.ChangeToRequiredChain">Switch to @visionsContractAddressService.GetChainName()</MudButton>
+                                </MudStack>
+
+                            </MudGrid>
+                        </MudCardContent>
+                    </MudCard>
+                </MudGrid>
+            }
+            else
+            {
+                <MudGrid Justify="Justify.Center" Class="ma-5">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5">Connect Account</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudImage Src="images/favicon256x256.png" Width="32" Height="32" Alt="Cafe Cosmos" Elevation="25" Class="rounded-lg mr-5" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+
+                            <MudGrid Justify="Justify.Center" Class="mt-5 mb-5">
+
+                                <MudStack Class="pa-2" AlignItems="AlignItems.Center" Spacing="5">
+                                    <Start/>
+                                </MudStack>
+
+                            </MudGrid>
+                        </MudCardContent>
+                    </MudCard>
+                </MudGrid>
+            }
+
+        }
+        else
+        {
+            if (GameViewModel.LoadingPlayerLand)
+            {
+                <MudGrid Justify="Justify.Center" Class="ma-10">
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5">Loading Game...</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudImage Src="images/favicon256x256.png" Width="32" Height="32" Alt="Cafe Cosmos" Elevation="25" Class="rounded-lg ma-5" />
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+
+                            <MudGrid Justify="Justify.Center" Class="mt-5 mb-5">
+
+                                <MudStack Class="pa-2" AlignItems="AlignItems.Center" Spacing="5">
+                                    <MudProgressCircular Color="Color.Secondary" Size="Size.Medium" Indeterminate="true" />
+                                </MudStack>
+
+                            </MudGrid>
+                        </MudCardContent>
+                    </MudCard>
+                </MudGrid>
+            }
+            else
+            {
+                if (GameViewModel.HasLand() && GameViewModel.PlayerLocalState != null)
+                {
+
+                    <MudTabs @ref="tabs" Class="mt-0 ml-0" Elevation="4" Rounded="true" Centered="true" Outlined="true" Color="@Color.Primary" MinimumTabWidth="100px" ActivePanelIndexChanged="ActiveTabPanelChanged" Position="Position.Left">
+
+                        <MudTabPanel Icon="@Icons.Material.Filled.Landscape" ToolTip="Game">
+                            <MudStack Row=false Class="mt-3">
+
+                                <MudGrid Class="mt-0 ba" Justify="Justify.Center">
+
+
+                                    <MudButtonGroup Class="ml-12 border-solid border rounded-lg mud-border-primary" Variant="Variant.Outlined" VerticalAlign="false" OverrideStyles="false" Style="background:white">
+                                        <MudTooltip Text="Place" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                            <MudIconButton Style="height:40px" Icon="@Icons.Material.Filled.PinDrop" Variant="GetItemEditingModeButtonVariant(ItemEditingMode.PlaceItem)" Color="Color.Primary" @onclick="() => GameViewModel.ItemEditingMode = ItemEditingMode.PlaceItem"></MudIconButton>
+                                        </MudTooltip>
+                                        <MudTooltip Text="Remove" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                            <MudIconButton Style="height:40px" Icon="@Icons.Material.Filled.Remove" Variant="GetItemEditingModeButtonVariant(ItemEditingMode.RemoveItem)" Color="Color.Primary" @onclick="() => GameViewModel.ItemEditingMode = ItemEditingMode.RemoveItem"></MudIconButton>
+                                        </MudTooltip>
+                                        <MudTooltip Text="Rotate" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                            <MudIconButton Style="height:40px" Icon="@Icons.Material.Filled.RotateLeft" Variant="GetItemEditingModeButtonVariant(ItemEditingMode.RotateItem)" Color="Color.Primary" @onclick="() => GameViewModel.ItemEditingMode = ItemEditingMode.RotateItem"></MudIconButton>
+                                        </MudTooltip>
+
+                                        @if (zoomOut)
+                                        {
+                                            <MudTooltip Text="Zoom In" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudIconButton Style="height:40px" Icon="@Icons.Material.Filled.ZoomIn" Variant="GetItemEditingModeButtonVariant(ItemEditingMode.ZoomToItem)" Color="Color.Primary" @onclick="() => GameViewModel.ItemEditingMode = ItemEditingMode.ZoomToItem"></MudIconButton>
+                                            </MudTooltip>
+                                        }
+                                        else
+                                        {
+                                            <MudTooltip Text="Zoom Out" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudIconButton Style="height:40px" Icon="@Icons.Material.Filled.ZoomOut" Variant="Variant.Text" Color="Color.Primary" @onclick="() => ChangeZoom()" Disabled="@(GameViewModel.SavingPlayerLand)"></MudIconButton>
+                                            </MudTooltip>
+                                        }
+
+                                    </MudButtonGroup>
+                                    <MudButtonGroup Class="ml-12 border-solid rounded-lg border mud-border-primary" Variant="Variant.Outlined" VerticalAlign="false" OverrideStyles="false" Style="background:white">
+                                        <MudTooltip Text="Hand" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                            <MudButton OnClick="() => SelectTool(DefaultItems.Tools.HAND)" Variant="GetSelectedInventoryItemButtonVariant(DefaultItems.Tools.HAND)" Color="Color.Primary" Style="height:40px">
+                                                <MudImage Height="40" Src="images/tools/arm.png" Alt="Hand Tool" Class="rounded-lg" />
+                                            </MudButton>
+                                        </MudTooltip>
+                                        @if (!IsInventoryItemToolDisabled(DefaultItems.Tools.AXE))
+                                        {
+                                            <MudTooltip Text="Hand" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudButton OnClick="() => SelectTool(DefaultItems.Tools.AXE)" Variant="GetSelectedInventoryItemButtonVariant(DefaultItems.Tools.AXE)" Color="Color.Primary" Style="height:40px" Disabled="IsInventoryItemToolDisabled(DefaultItems.Tools.AXE)">
+                                                    <MudImage Height="40" Src="images/tools/axe.png" Alt="Axe Tool" Class="rounded-lg" />
+                                                </MudButton>
+                                            </MudTooltip>
+                                        }
+                                        @if (!IsInventoryItemToolDisabled(DefaultItems.Tools.HOE))
+                                        {
+                                            <MudTooltip Text="Hoe" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudButton OnClick="() => SelectTool(DefaultItems.Tools.HOE)" Variant="GetSelectedInventoryItemButtonVariant(DefaultItems.Tools.HOE)" Color="Color.Primary" Style="height:40px" Disabled="IsInventoryItemToolDisabled(DefaultItems.Tools.HOE)">
+                                                    <MudImage Height="40" Src="images/tools/hoe.png" Alt="Hoe Tool" Class="rounded-lg" />
+                                                </MudButton>
+                                            </MudTooltip>
+                                        }
+                                        @if (!IsInventoryItemToolDisabled(DefaultItems.Tools.PICKAXE))
+                                        {
+                                            <MudTooltip Text="Pick Axe" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudButton OnClick="() => SelectTool(DefaultItems.Tools.PICKAXE)" Variant="GetSelectedInventoryItemButtonVariant(DefaultItems.Tools.PICKAXE)" Color="Color.Primary" Style="height:40px" Disabled="IsInventoryItemToolDisabled(DefaultItems.Tools.PICKAXE)">
+                                                    <MudImage Height="40" Src="images/tools/pickaxe.png" Alt="Pick axe Tool" Class="rounded-lg" />
+                                                </MudButton>
+                                            </MudTooltip>
+                                        }
+                                        @if (!IsInventoryItemToolDisabled(DefaultItems.Tools.SCYTHE))
+                                        {
+                                            <MudTooltip Text="Scythe" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudButton OnClick="() => SelectTool(DefaultItems.Tools.SCYTHE)" Variant="GetSelectedInventoryItemButtonVariant(DefaultItems.Tools.SCYTHE)" Color="Color.Primary" Style="height:40px" Disabled="IsInventoryItemToolDisabled(DefaultItems.Tools.SCYTHE)">
+                                                    <MudImage Height="40" Src="images/tools/sickle.png" Alt="Scythe Tool" Class="rounded-lg" />
+                                                </MudButton>
+                                            </MudTooltip>
+                                        }
+
+                                        @if (!IsInventoryItemToolDisabled(DefaultItems.Tools.WATERING_CAN_FULL))
+                                        {
+                                            <MudTooltip Text="Watering Can" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudButton OnClick="() => SelectTool(DefaultItems.Tools.WATERING_CAN_FULL)" Variant="GetSelectedInventoryItemButtonVariant(DefaultItems.Tools.WATERING_CAN_FULL)" Color="Color.Primary" Style="height:40px" Disabled="IsInventoryItemToolDisabled(DefaultItems.Tools.WATERING_CAN_FULL)">
+                                                    <MudImage Height="40" Src="images/tools/watering-can.png" Alt="Watering Can" Class="rounded-lg" />
+                                                </MudButton>
+                                            </MudTooltip>
+                                        }
+
+                                    </MudButtonGroup>
+                                    <MudButtonGroup Class="ml-12 border-solid rounded-lg border mud-border-primary" Variant="Variant.Outlined" VerticalAlign="false" OverrideStyles="false" Style="background:white">
+                                        <MudTooltip Text="Inventory" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                            <MudButton OnClick="() => ShowInventoryDialog()" Variant="Variant.Text" Color="Color.Primary" Style="height:40px">
+                                                <MudImage Height="40" Src="images/icons/inventory.png" Alt="Inventory" Class="rounded-lg" />
+                                            </MudButton>
+                                        </MudTooltip>
+                                        @if (!IsSelectedInventoryItemMenuTool())
+                                        {
+                                            <MudTooltip Text="@GameViewModel.SelectedInventoryItem.Name" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Style="height:40px">
+                                                    <MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
+                                                        <MudImage Height="40" Src="@GetImage(GameViewModel.SelectedInventoryItem.Id)"></MudImage>
+                                                    </MudStack>
+                                                </MudButton>
+                                            </MudTooltip>
+                                        }
+
+                                    </MudButtonGroup>
+
+
+
+                                    <MudButton Style="background:white" Class="ml-12 border-solid border rounded-lg mud-border-primary" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Landscape" @onclick="() => ShowExpandLandDialog()" Disabled="@(GameViewModel.SavingPlayerLand)">
+
+                                        @if (GameViewModel.SavingPlayerLand)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                            <MudText Class="ms-2">Expand Land</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Expand Land</MudText>
+                                        }
+
+                                    </MudButton>
+
+                                    <MudButton Style="background:white" Class="ml-12 border-solid border rounded-lg mud-border-primary" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" @onclick="() => GameViewModel.SavePlayerStateToChainAndWaitForReceiptAsync()" Disabled="@(GameViewModel.SavingPlayerLand)">
+
+                                        @if (GameViewModel.SavingPlayerLand)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                            <MudText Class="ms-2">Saving Changes</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Save Changes</MudText>
+                                        }
+
+                                    </MudButton>
+
+                                   
+
+                                </MudGrid>
+
+
+                                <MudGrid Justify="Justify.FlexStart" Class="mt-0 pt-0 pl-0 pr-0 mr-0">
+
+                                    <Land Zoom="zoomOut" @ref="land" GameViewModel="GameViewModel" ReadOnly="false" LandItems="GameViewModel.GetLandItemsFromPlayerLocalState()" />
+
+                                    <MudOverlay Visible="GameViewModel.SavingPlayerLand" DarkBackground="true" Absolute="true">
+                                        <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+                                    </MudOverlay>
+                                </MudGrid>
+
+
+
+                                @if (!string.IsNullOrEmpty(GameViewModel.ErrorMessage))
+                                {
+                                    <MudGrid Justify="Justify.Center" Class="mt-0 pt-0 pl-0 pr-0 mr-0">
+
+                                        <MudAlert Style="width:500px" Class="mt-5" Severity="Severity.Error" Square="true" ShowCloseIcon="true" CloseIconClicked="(() => GameViewModel.ErrorMessage = String.Empty)">@GameViewModel.ErrorMessage</MudAlert>
+                                    </MudGrid>
+
+                                }
+                            </MudStack>
+
+
+                        </MudTabPanel>
+                        @if (GameViewModel.HasLand())
+                        {
+                            <MudTabPanel Icon="@Icons.Material.Filled.Inventory" ToolTip="Inventory" BadgeData='GameViewModel.GetInventoryBatchData()' BadgeColor="Color.Info">
+                                @if (GameViewModel.IsLoaded())
+                                {
+                                    <MudGrid Class="ml-5 pt-0 pl-0 pr-0 mr-0">
+                                        <Inventory GameViewModel="GameViewModel" OnInventoryItemSelected="InventoryItemSelected"></Inventory>
+                                    </MudGrid>
+                                }
+                            </MudTabPanel>
+                            <MudTabPanel Icon="@Icons.Material.Filled.Build" ToolTip="Craft Recipe">
+                                @if (GameViewModel.IsLoaded())
+                                {
+                                    <MudGrid Class="ml-5 pt-0 pl-0 pr-0 mr-0">
+                                        <Crafting GameViewModel="GameViewModel"></Crafting>
+                                    </MudGrid>
+                                }
+                            </MudTabPanel>
+
+                            <MudTabPanel Icon="@Icons.Material.Filled.Shop" ToolTip="Catalogue">
+                                @if (GameViewModel.IsLoaded())
+                                {
+                                    <MudGrid Class="ml-5 pt-0 pl-0 pr-0 mr-0">
+                                        <Catalogue GameViewModel="GameViewModel"></Catalogue>
+                                    </MudGrid>
+                                }
+                            </MudTabPanel>
+
+                            <MudTabPanel Icon="@Icons.Material.Filled.Games" ToolTip="Quests">
+                                @if (GameViewModel.IsLoaded())
+                                {
+                                    <MudGrid Class="ml-5 pt-0 pl-0 pr-0 mr-0">
+                                        <Quests GameViewModel="GameViewModel"></Quests>
+                                    </MudGrid>
+                                }
+                            </MudTabPanel>
+                        }
+                        <MudTabPanel Icon="@Icons.Material.Filled.Scoreboard" ToolTip="Friends">
+                            @if (GameViewModel.IsLoaded())
+                            {
+                                <MudGrid Class="ml-5 pt-0 pl-0 pr-0 mr-0">
+                                    <LeaderBoard GameViewModel="GameViewModel"></LeaderBoard>
+                                </MudGrid>
+                            }
+                        </MudTabPanel>
+
+
+                    </MudTabs>
+
+                }
+                else
+                {
+                    if (!GameViewModel.HasLand())
+                    {
+                        <ExpandLand GameViewModel="GameViewModel" />
+                    }
+                    else
+                    {
+                        //The land is getting rendered, lets wait for next update tick
+                    }
+                }
+            }
+
+
+        }
+    </Authorized>
+    <NotAuthorized>
+
+        <MudGrid Justify="Justify.Center" Class="ma-5">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h5">Welcome To Cafe Cosmos</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudImage Src="images/favicon256x256.png" Width="32" Height="32" Alt="Cafe Cosmos" Elevation="25" Class="rounded-lg mr-5" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+
+                    <MudGrid Justify="Justify.Center" Class="mt-5 mb-5">
+
+                        <MudStack Class="pa-2" AlignItems="AlignItems.Center" Spacing="5">
+                            <NetheremHostKeyManagement></NetheremHostKeyManagement>
+                        </MudStack>
+
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+        </MudGrid>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+
+    MudTabs tabs;
+    int mudTabsActiveIndex = 0;
+    Land land;
+    bool zoomOut = false;
+
+
+
+
+
+    public void InventoryItemSelected(InventoryItem item)
+    {
+        tabs.ActivatePanel(0);
+    }
+
+    public async Task ActiveTabPanelChanged(int activeIndex)
+    {
+        mudTabsActiveIndex = activeIndex;
+        if (activeIndex == 3) // scoreboard navigation refresh
+        {
+            await GameViewModel.RefreshLeaderBoardAsync();
+        }
+
+        if (activeIndex == 0)
+        {
+            try
+            {
+                await land.SetFocusAsync();
+            }
+            catch { };
+        }
+    }
+
+    public Variant GetItemEditingModeButtonVariant(ItemEditingMode itemEditingMode)
+    {
+        if (GameViewModel.ItemEditingMode == itemEditingMode)
+        {
+            return Variant.Filled;
+        }
+        return Variant.Text;
+    }
+
+    public async Task ShowInventoryDialog()
+    {
+        var parameters = new DialogParameters<InventoryDialog> { { x => x.GameViewModel, GameViewModel } };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+        var dialog = await DialogService.ShowAsync<InventoryDialog>("Inventory", parameters, options);
+    }
+
+    public async Task ShowHelpDialog()
+    {
+        var parameters = new DialogParameters<HelpDialog> { { x => x.GameViewModel, GameViewModel } };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<HelpDialog>("Help", parameters, options);
+    }
+
+    public async Task ShowExpandLandDialog()
+    {
+        var parameters = new DialogParameters<ExpandLandDialog> { { x => x.GameViewModel, GameViewModel } };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<ExpandLandDialog>("Expand Land", parameters, options);
+    }
+
+
+    public void ShowErrorSnackbar()
+    {
+
+        if (GameViewModel.NewError)
+        {
+            var position = Defaults.Classes.Position.BottomCenter;
+            Snackbar.Configuration.PositionClass = position;
+            Snackbar.Add(GameViewModel.ErrorMessage,
+                         Severity.Error,
+                            config =>
+                            {
+                                config.ShowCloseIcon = false;
+                                config.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+
+                                config.Onclick = snackbar =>
+                                    {
+                                        GameViewModel.ErrorMessage = null;
+                                        return Task.CompletedTask;
+                                    };
+                            });
+            GameViewModel.NewError = false;
+
+        }
+    }
+
+    public Variant GetSelectedInventoryItemButtonVariant(Item itemPlaceModode)
+    {
+        if (GameViewModel.SelectedInventoryItem == itemPlaceModode)
+        {
+            return Variant.Filled;
+        }
+        return Variant.Text;
+    }
+
+    public bool IsInventoryItemToolDisabled(Item toolItem)
+    {
+        if (GameViewModel.PlayerLocalState != null)
+        {
+            return !(GameViewModel.GetInventoryItemsFromPlayerLocalState().Any(x => x.ItemId == toolItem.Id && x.Count > 0));
+        }
+        return true;
+    }
+
+    public bool IsSelectedInventoryItemMenuTool()
+    {
+        return DefaultItems.GetDefaultLandTools().Any(x => x.Id == GameViewModel.SelectedInventoryItem.Id);
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        
+        if (!GameViewModel.IsLoaded())
+        {
+
+            StateHasChanged();
+            // Console.WriteLine(result);
+
+            try
+            {
+                 GameViewModel.LoadingPlayerLand = true;
+                //await InvokeAsync(StateHasChanged);
+
+                if (await selectedHostProviderService.SelectedHost.CheckProviderAvailabilityAsync())
+                {
+                    //GameViewModel.LoadingPlayerLand = true;
+                    //await InvokeAsync(StateHasChanged);
+                    Console.WriteLine("Calling Validate from OnInitialised");
+                    await GameViewModel.ValidateCurrentChainAndLoadSelectedAccount();
+                }
+            }
+            finally
+            {
+                GameViewModel.LoadingPlayerLand = false;
+            }
+        }
+
+        GameViewModel.GameChanged += NotifyStateHasChanged;
+        GameViewModel.ZoomToItemSelected += ZoomToItem;
+
+        
+    }
+
+    public async Task NotifyStateHasChanged(){
+        StateHasChanged();
+              //  await InvokeAsync(StateHasChanged);
+    }
+
+    public void ZoomToItem(BigInteger x, BigInteger y)
+    {
+        if(land != null)
+        {
+            zoomOut = false;
+            land.SetMinXMinY(x, y);
+            GameViewModel.ItemEditingMode = ItemEditingMode.PlaceItem;
+            StateHasChanged();
+        }
+    }
+
+    public async Task ChangeZoom()
+    {
+        zoomOut = !zoomOut;
+        //GameViewModel.ItemEditingMode = ItemEditingMode.ZoomToItem;
+        land.ResetMinXMinY();
+        try{
+        await land.SetFocusAsync();
+        }
+        catch { };
+    }
+
+    private string GetImage(BigInteger itemId)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == itemId);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+    protected override async void OnAfterRender(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+
+            using var periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+            while (await periodicTimer.WaitForNextTickAsync())
+            {
+                //we use the timer to update the unlock items, this also works to update some inner events like land changes based on address
+                //as opposed to notify property / actions etc
+                //also to display the errors snackbar
+                if (mudTabsActiveIndex == 0) // only interested to refresh the "game" tab,
+                                             //this also avoids issues on other tabs state
+                {
+                   
+
+                    if (land != null)
+                    {
+                        if (!zoomOut)
+                        {
+                            try{
+                                await land.SetFocusAsync();
+                            }
+                            catch { };
+                            
+                            if (GameViewModel.HasLand() && !GameViewModel.LoadingPlayerLand && !GameViewModel.SavingPlayerLand)
+                            {
+                               StateHasChanged();
+                            }
+                        }
+                        ///AUTOSAVE!!
+                        if (GameViewModel.PlayerLocalState.IsItRequiredToSave())
+                        {
+                            
+                             await GameViewModel.SavePlayerStateToChainAndWaitForReceiptAsync();
+                        }
+                    }
+                    ShowErrorSnackbar();
+                    
+                }
+            }
+        }
+    }
+
+
+
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
+
+
+    private void SelectTool(Item item)
+    {
+        GameViewModel.SelectedInventoryItem = item;
+    }
+
+    public void Dispose()
+    {
+        GameViewModel.GameChanged -= NotifyStateHasChanged; //dispose
+        GameViewModel.ZoomToItemSelected -= ZoomToItem;
+
+    }
+}

@@ -1,0 +1,153 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using System.Numerics;
+@using System.Net;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Items;
+
+<style>
+    .mud-table-cell
+    {
+        border-bottom:0px;
+    }
+</style>
+
+
+<MudPaper Class="mt-5">
+<MudDataGrid Bordered="false" Outlined="false" T="InventoryItem" Items="@GameViewModel.GetInventoryItemsFromPlayerLocalState().Where(x => x.Count > 0).ToList()" SortMode="SortMode.None" Virtualize="true" FixedHeader="true" Height="700px" QuickFilter="@_quickFilter" ColumnResizeMode="ResizeMode.Column">
+        <ToolBarContent>
+            @if (!CompactMode)
+            {
+                <MudStack>
+                    <MudText Typo="Typo.h6">Inventory Items</MudText>
+                </MudStack>
+                <MudSpacer />
+                @if (GameViewModel.SelectedInventoryItem != null && !IsSelectedInventoryItemMenuTool())
+                {
+                    <MudStack Row="true">
+                        <MudText Typo="Typo.body2">Selected:</MudText>
+                        <MudAvatar Color="Color.Surface" Variant="Variant.Outlined" Image="@GetImage(GameViewModel.SelectedInventoryItem.Id)" Size="Size.Medium" />
+                        <MudStack Row="false" Spacing="0">
+                            <MudText Typo="Typo.body2">@GameViewModel.SelectedInventoryItem.Name</MudText>
+                            <MudText Typo="Typo.body2">Count: @GameViewModel.GetInventoryItemsFromPlayerLocalState().Where(x => x.ItemId == GameViewModel.SelectedInventoryItem.Id).FirstOrDefault().Count</MudText>
+                        </MudStack>
+                    </MudStack>
+                }
+            
+                <MudSpacer />
+            }
+            <MudTextField @bind-Value="_inventorySearchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <Columns>
+
+        <TemplateColumn>
+                <CellTemplate>
+                 <MudGrid Justify="Justify.Center">
+                    <MudCard Style="width:400px" >
+                        <MudCardHeader>
+                                <CardHeaderAvatar>
+                                <MudButton OnClick="() => SetSelectedInventoryItem(context.Item)">
+                                     <MudAvatar Color="Color.Surface" Variant="Variant.Outlined" Image="@GetImage(context.Item)" Size="Size.Large" />
+                                </MudButton>
+                                </CardHeaderAvatar>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.body1">@GetItemName(context.Item.ItemId)</MudText>
+                                    <MudText Typo="Typo.body2">Count: @context.Item.Count</MudText>
+                                    <MudText Typo="Typo.body2">Id: @context.Item.ItemId</MudText>
+                                </CardHeaderContent>
+                                <CardHeaderActions>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Check" OnClick="() => SetSelectedInventoryItem(context.Item)" Color="Color.Default" />
+                                </CardHeaderActions>
+                            </MudCardHeader>
+                        </MudCard>
+                </MudGrid>
+                 
+              
+                </CellTemplate>
+            </TemplateColumn>
+         
+        </Columns>
+       
+    </MudDataGrid>
+
+</MudPaper>
+@code {
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+    [Parameter] public bool CompactMode { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<InventoryItem> OnInventoryItemSelected { get; set; }
+
+
+    private string _inventorySearchString;
+
+    private string GetItemName(BigInteger id)
+    {
+        var item = DefaultItems.FindItemById(id);
+        if (item == null) return "Grass";
+        return item.Name;
+    }
+
+    private string GetImage(InventoryItem item)
+    {
+        return GetImage(item.ItemId);
+    }
+
+    private string GetImage(BigInteger itemId)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == itemId);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+    public bool URLExists(string url)
+    {
+        bool result = true;
+
+        WebRequest webRequest = WebRequest.Create(url);
+        webRequest.Timeout = 1200; // miliseconds
+        webRequest.Method = "HEAD";
+
+        try
+        {
+            webRequest.GetResponse();
+        }
+        catch
+        {
+            result = false;
+        }
+
+        return result;
+    }
+
+
+    private async void SetSelectedInventoryItem(InventoryItem item)
+    {
+        GameViewModel.SelectedInventoryItem = DefaultItems.FindItemById(item.ItemId);
+        await OnInventoryItemSelected.InvokeAsync(item);
+    }
+
+    public bool IsSelectedInventoryItemMenuTool()
+    {
+        return DefaultItems.Tools.Default.Any(x => x.Id == GameViewModel.SelectedInventoryItem.Id);
+
+    }
+
+    private Func<InventoryItem, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_inventorySearchString))
+            return true;
+        var name = GetItemName(x.ItemId);
+        if (name.Contains(_inventorySearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.ItemId}".Contains(_inventorySearchString))
+            return true;
+
+        return false;
+    };
+
+}

@@ -1,0 +1,9 @@
+{
+  "ChainId": 690,
+  "RedistributorAddress": "0xd8a94218936c2ceb6182e53f0db35edf263edce5",
+  "TokenAddress": "0x31212186ffe0a354335cbfb2dff837900f145f46",
+  "ItemsAddress": "0x7df5da1bdcc7a890efd8c8d5ece1a38e2968795a",
+  "LandAddress": "0xBA24a3E1980D25E3A23A0d62dDA9a49917D811D6",
+  "VestingAddress": "0x3f3663714e22bc1ff1df0ece6e9b06ce08ff0f32",
+  "LandNFTAddress": "0x678063e4171e5dd2a11d380115e986c8faed8974"
+}

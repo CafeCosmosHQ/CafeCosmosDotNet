@@ -1,0 +1,76 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using Nethereum.Web3
+@using VisionsContracts.Items.Model;
+
+ <MudGrid Justify="Justify.Center" Class="mt-5">
+
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h3">Welcome to Cafe Cosmos</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+               
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+               <MudGrid Justify="Justify.Center" Class="mt-5">
+                    <MudStack Row="false" AlignItems="AlignItems.Center" Class="pa-2">
+                        <MudText>To start playing the game, you need to purchase some land.</MudText>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Class="pa-2">
+                            <MudImage Height="40" Src="images/icons/token_icon.png" Alt="Balance" Class="rounded-lg" />
+                        <MudText Color="Color.Primary" Typo="Typo.button">Balance: @decimal.Round(GameViewModel.PlayerInfo.BalanceToMainUnit(), 2)</MudText>
+                        <MudText Color="Color.Primary" Typo="Typo.button">Required: @requiredAmount</MudText>
+                    </MudStack>
+                   
+             
+                    <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.Landscape" Label="Buy Land" @onclick="() => SubmitAsync()" Disabled="@(GameViewModel.SavingPlayerLand)">
+
+                        @if (GameViewModel.SavingPlayerLand)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Buy Land</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Buy Land</MudText>
+                        }
+                    </MudFab>
+
+                    <img width="500" height="319" src="images/logo.png" />
+                </MudStack>
+                </MudGrid>
+        </MudCardContent>
+        <MudCardActions>
+          
+        </MudCardActions>
+    </MudCard>
+   
+    
+</MudGrid>
+@code {
+
+    int x = 10;
+    int y = 10;
+    decimal requiredAmount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        requiredAmount = Web3.Convert.FromWei(await GameViewModel.CalculateLandCostQueryAsync(x, y));
+    }
+
+    async Task SubmitAsync()
+    {
+        await GameViewModel.InitialisePlayerInitialFreeTestLandRequestAndWaitForReceiptAsync();
+        //await GameViewModel.ExpandLandAndWaitForReceiptAsync(x, y);
+
+    }
+
+    async Task RevealAsync()
+    {
+        await GameViewModel.RevealAndGenerateChunkAndWaitForReceiptAsync();
+    }
+
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+}

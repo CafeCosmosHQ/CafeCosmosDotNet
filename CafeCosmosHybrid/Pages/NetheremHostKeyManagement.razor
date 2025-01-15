@@ -1,0 +1,211 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using Nethereum.Web3
+@using VisionsContracts.Items.Model;
+@using Nethereum.Signer;
+@using Nethereum.Util;
+@using Nethereum.UI;
+@using Nethereum.Hex.HexConvertors.Extensions;
+@using Nethereum.KeyStore;
+@inject SelectedEthereumHostProviderService SelectedEthereumHostProviderService
+@inject NethereumHostProvider NethereumHostProvider
+<MudGrid Justify="Justify.Center" Class="mt-5">
+    <MudStack Row="false" AlignItems="AlignItems.Center" Class="pa-2">
+        @if (newWallet)
+        {
+            <MudText Typo="Typo.body2">Please enter your private key and password, make sure you save it and remember your password</MudText>
+            <MudItem xs="8">    
+                <MudStack Row="false" AlignItems="AlignItems.Center" Spacing="5">
+                    <MudStack Row="true" Spacing="5">
+                        <MudTextField FullWidth=true MaxLength="66" Label="Private key" @bind-Value="newPrivateKey" TextChanged="() => DisplayNew()" />
+                        <MudFab Class="mt-3" Label="New" @onclick="() => GenerateNewKey()" StartIcon="@Icons.Material.Filled.Refresh"></MudFab>
+                    </MudStack>
+                    <MudTextField FullWidth=true MaxLength="66" Label="Account Address" @bind-Value="newAccountAddress" ReadOnly="true" />
+                    <MudTextField FullWidth=true MaxLength="66" Label="Password" InputType="InputType.Password" @bind-Value="newPassword" />
+                </MudStack>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                    <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.Start" Label="Save and Start" @onclick="() => SaveAndStartTheGameAsync()">
+                    </MudFab>
+                    @if (previousWallet)
+                    {
+                        <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.ArrowBack" Label="Back" @onclick="() => NavigateBackForthNewWallet()">
+                        </MudFab>
+                    }
+                </MudStack>
+            </MudItem>
+        }
+        else
+        {
+
+
+            @if (backup)
+            {
+                <MudItem xs="8">
+                    <MudStack Row="false" AlignItems="AlignItems.Center" Spacing="5">
+                        <MudStack Row="true" Spacing="5">
+                            <MudTextField FullWidth=true MaxLength="66" Label="Private key" @bind-Value="privateKey" />
+                        </MudStack>
+                        <MudTextField FullWidth=true MaxLength="66" Label="Account Address" @bind-Value="accountAddress" ReadOnly="true" />
+                    </MudStack>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                        <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.ArrowBack" Label="Back" @onclick="() => BackFromBackup()">
+                        </MudFab>
+                    </MudStack>
+                </MudItem>
+            }
+            else
+            {
+                <MudText>Account: @accountAddress</MudText>
+                <MudItem xs="12">
+                    <MudTextField FullWidth=true MaxLength="66" Label="Password" InputType="InputType.Password" @bind-Value="password" />
+                </MudItem>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                    <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.Start" Label="Start game" @onclick="() => SubmitAsync()"> </MudFab>
+                    <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.Backup" Label="Backup " @onclick="() => Backup()">
+                    </MudFab>
+                    <MudFab Class="mt-3" StartIcon="@Icons.Material.Filled.Refresh" Label="New / Restore" @onclick="() => NavigateBackForthNewWallet()"> </MudFab>
+                </MudStack>
+
+            }
+        }
+
+        <MudText Typo="Typo.caption" Color="Color.Error">@errorMessage</MudText>
+
+
+        <img width="500" height="319" src="images/logo.png" />
+    </MudStack>
+</MudGrid>
+@code {
+
+
+    private string privateKey = "";
+    private string accountAddress = "";
+    private string accountFile = "";
+
+    private string password = "";   
+    private string newAccountAddress = "";
+    private string newPrivateKey = "";
+    private string newPassword = "";
+    private string errorMessage = "";
+    private bool backupNewMode = false;
+    private const string fileName = "wallet.json";
+
+    private bool backup = false;
+
+    private bool newWallet = false;
+    private bool previousWallet = false;
+
+    private string GetFileName()
+    {
+        return Path.Combine(FileSystem.AppDataDirectory, fileName);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (File.Exists(GetFileName()))
+        {
+            accountFile = File.ReadAllText(GetFileName());
+            previousWallet = true;
+            var keyStore = new KeyStoreService();
+            accountAddress = keyStore.GetAddressFromKeyStore(accountFile);
+            newWallet = false;
+        }
+        else
+        {
+            previousWallet = false;
+            newWallet = true;
+        }
+    }
+    protected void DisplayNew()
+    {
+        if (!string.IsNullOrEmpty(newPrivateKey))
+        {
+            if (newPrivateKey.IsHex())
+            {
+                try
+                {
+                    var key = new EthECKey(newPrivateKey);
+                    newAccountAddress = key.GetPublicAddress();
+                    errorMessage = "";
+                }
+                catch
+                {
+                    errorMessage = "Invalid private key";
+                }
+            }
+        }
+        else
+        {
+            errorMessage = "";
+            newAccountAddress = "";
+        }
+
+    }
+
+    protected void BackFromBackup()
+    {
+        backup = false;
+        privateKey = "";
+    }
+
+    protected void Backup()
+    {
+        try
+        {
+            var keyStore = new KeyStoreService();
+            var decryptedKey = keyStore.DecryptKeyStoreFromJson(password, accountFile);
+            privateKey = decryptedKey.ToHex();
+            DisplayNew();
+            backup = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error decrypting, please make sure your password is correct";
+        }
+    }
+
+    protected void NavigateBackForthNewWallet()
+    {
+        newWallet = !newWallet;
+        newPrivateKey = "";
+        newAccountAddress = "";
+        newPassword = "";
+    }
+
+    protected void GenerateNewKey()
+    {
+        newPrivateKey = EthECKey.GenerateKey().GetPrivateKey();
+        DisplayNew();
+    }
+
+    async Task SubmitAsync()
+    {
+        try
+        {
+            var keyStore = new KeyStoreService();
+            var decryptedKey = keyStore.DecryptKeyStoreFromJson(password, accountFile);
+            NethereumHostProvider.SetSelectedAccount(decryptedKey.ToHex());
+            await SelectedEthereumHostProviderService.SetSelectedEthereumHostProvider(NethereumHostProvider);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error decrypting, please make sure your password is correct";
+        }
+    }
+  
+    async Task SaveAndStartTheGameAsync()
+    {
+        try
+        {
+            var keyStore = new KeyStoreService();
+            var encryptedKey = keyStore.EncryptAndGenerateDefaultKeyStoreAsJson(newPassword, newPrivateKey.HexToByteArray(), newAccountAddress);
+            File.WriteAllText(GetFileName(), encryptedKey);
+            NethereumHostProvider.SetSelectedAccount(newPrivateKey);
+            await SelectedEthereumHostProviderService.SetSelectedEthereumHostProvider(NethereumHostProvider);
+
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error saving, please make sure your private key is correct";
+        }
+    }
+}

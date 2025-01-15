@@ -1,0 +1,77 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.Items.Model;
+@inject NavigationManager NavigationManager
+
+<MudDialog>
+    <DialogContent>
+        <MudText>If you encounter a bug please copy both the Land Json and Inventory Json so it can be replicated the current state of your game.</MudText>
+        <MudText Typo="Typo.subtitle2">Click on <MudIcon Icon="@Icons.Material.Filled.Api" Color="Color.Primary" /> to select all the content.</MudText>
+        <MudText Typo="Typo.subtitle2">Land Id @GetLandId()</MudText>
+        <MudTextField @ref="landJsonTextField" T="string" Label="Land Json" Lines="10"
+        Variant="Variant.Outlined" Text="@GetLandAsJson()" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Api" OnAdornmentClick="@(() => landJsonTextField.SelectAsync())" />
+
+
+        <MudTextField @ref="landInitialItemTextField" T="string" Label="Land Json" Lines="10"
+                      Variant="Variant.Outlined" Text="@GetLandAsInitialItem()" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Api" OnAdornmentClick="@(() => landInitialItemTextField.SelectAsync())" />
+
+
+        <MudTextField @ref="inventoryTextField" T="string" Label="Inventory Json" Lines="10"
+        Variant="Variant.Outlined" Text="@GetInventoryAsJson()" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Api" OnAdornmentClick="@(() => inventoryTextField.SelectAsync())" />
+
+        <MudTextField @ref="landInfoTextField" T="string" Label="Land Info Json" Lines="10"
+        Variant="Variant.Outlined" Text="@GetLandInfoAsJson()" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Api" OnAdornmentClick="@(() => landInfoTextField.SelectAsync())" />
+
+
+        <MudTooltip Text="Change testing Land">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="@(()=>NavigationManager.NavigateTo("landtestscenario", true))">Change land Scenario</MudButton>
+
+        </MudTooltip>
+
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+    private MudTextField<string> landJsonTextField;
+    private MudTextField<string> inventoryTextField;
+    private MudTextField<string> landInfoTextField;
+    private MudTextField<string> landInitialItemTextField;
+
+
+    private void Close()
+    {
+        MudDialog.Close();
+    }
+
+
+    public string GetLandAsJson()
+    {
+        return GameViewModel.GetLandAsJson();
+    }
+
+    public string GetLandAsInitialItem()
+    {
+        return GameViewModel.GetLandAsInitialLandItem();
+    }
+
+    public string GetInventoryAsJson()
+    {
+        return GameViewModel.GetInventoryAsJson();
+    }
+
+
+
+    public string GetLandInfoAsJson()
+    {
+        return GameViewModel.GetPlayerLandInfoAsJson();
+    }
+
+    public string GetLandId()
+    {
+        return GameViewModel.GetLandId();
+    }
+
+}

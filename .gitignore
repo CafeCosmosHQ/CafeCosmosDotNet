@@ -406,3 +406,6 @@ repomix-output.txt
 
 CafeComosBlazor/wwwroot/testingSettings.json
 CafeComosBlazor/wwwroot/contractAddresses-testnet.json
+CafeCosmosHybrid/wwwroot/testingSettings.json
+CafeCosmosHybrid/wwwroot/contractAddresses-garnet.json
+CafeCosmosHybrid/wwwroot/contractAddresses-testnet.json

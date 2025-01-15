@@ -1,0 +1,179 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider _siweAuthenticationStateProvider;
+@inject SelectedEthereumHostProviderService _selectedEthereumHostProvider;
+@inject NethereumHostProvider _nethereumHostProvider;
+@inject IDialogService DialogService
+@using CafeCosmosBlazor.Pages
+@using CafeCosmosBlazor.Services
+@using CafeCosmosBlazor.ViewModel;
+@inject GameViewModel GameViewModel;
+@inject IVisionsContractAddressesService visionsContractAddressService;
+@inject IDialogService DialogService
+@using VisionsContracts;
+@implements IDisposable
+<style>
+        .btnMetamask {
+            border: none;
+            padding: 8px 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            color: #7F7F92;
+        }
+
+        .btnMetamask btnMetamaskSelected {
+            cursor: pointer
+        }
+
+        .btnMetamask::before {
+            content: url("_content/Nethereum.Metamask.Blazor/img/metamask-fox.svg");
+            width: 30px;
+            float: left;
+            margin-right: 5px;
+            margin-top: -2px;
+        }
+
+        .btnMetamask btnMetamaskSelected::before {
+            content: none !important;
+        }
+
+        .btnMetamaskDisabled {
+            filter: grayscale(1);
+        }
+
+        .mud-container {
+            background-color: #F1F4F8;
+        }
+
+</style>
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Color="Color.Transparent" Style="background:white" Dense="true">
+        @*  <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" /> *@
+        <MudImage Src="images/favicon256x256.png" Width="32" Height="32" Alt="Cafe Cosmos" Elevation="25" Class="rounded-lg mr-5" />
+        <MudSpacer />
+        <!--<Metamask SelectedAccountTruncateLength="20" /> -->
+        <AuthorizeView Roles="EthereumConnected">
+            <Authorized>
+                @if (GameViewModel.SelectedChainId == visionsContractAddressService.GetChainId())
+                {
+                    if (GameViewModel.HasLand())
+                    {
+                        <MudSpacer />
+                        <MudGrid Justify="Justify.FlexEnd" Class="mr-12">
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="pa-0">
+                                <MudText Color="Color.Dark" Class="mr-1" Typo="Typo.button">XP</MudText>
+                                <MudText Color="Color.Surface" Class="mr-1" Typo="Typo.button">@playerInfo.PlayerLandInfo.CumulativeXp</MudText>
+                            </MudStack>
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="pa-0">
+                                <MudImage Height="32" Src="images/icons/token_icon.png" Alt="Balance" Class="rounded-lg" />
+                                <MudText Color="Color.Surface" Class="mr-1" Typo="Typo.button">@decimal.Round(playerInfo.BalanceToMainUnit(), 4)</MudText>
+                            </MudStack>
+
+                           
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="pa-0">
+                                <MudText Color="Color.Dark" Class="mr-1" Typo="Typo.button">Level</MudText>
+                                <MudText Color="Color.Surface" Class="mr-1" Typo="Typo.button">@playerInfo.PlayerLandInfo.LastLevelClaimed</MudText>
+                            </MudStack>
+
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0" Class="pa-0 ml-5">
+                                <MudImage Height="32" Src="images/icons/block_of_land.png" Alt="Land" Class="rounded-lg" />
+                                <MudText Color="Color.Surface" Class="mr-1" Typo="Typo.button">@string.Format($"{playerInfo.PlayerLandInfo.LimitY}x{@playerInfo.PlayerLandInfo.LimitX}")</MudText>
+                            </MudStack>
+
+                            <MudButton Class="ml-12 border-solid border rounded-lg" Color="Color.Surface" Size="Size.Small" StartIcon="@Icons.Material.Filled.Refresh" @onclick="() => GameViewModel.ValidateCurrentChainAndLoadSelectedAccount()" Disabled="@(GameViewModel.SavingPlayerLand)">
+
+                                @if (GameViewModel.SavingPlayerLand)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Typo="Typo.caption" Class="ms-2">Refreshing</MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption">Refresh Game</MudText>
+                                }
+
+                            </MudButton>
+
+
+                            <MudButtonGroup Class="ml-12 border-solid border rounded-lg" Variant="Variant.Outlined" VerticalAlign="false" OverrideStyles="false">
+                                <MudTooltip Text="Help" Color="Color.Tertiary" Placement="Placement.Bottom" Arrow="true">
+                                    <MudIconButton Style="height:28px" Icon="@Icons.Material.Filled.QuestionMark" Variant="Variant.Text" Color="Color.Surface" @onclick="() => ShowHelpDialog()"></MudIconButton>
+                                </MudTooltip>
+                            </MudButtonGroup>
+
+                         
+
+                        </MudGrid>
+                    }
+
+                }
+            </Authorized>
+
+        </AuthorizeView>
+
+
+    </MudAppBar>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="pt-1 pl-0">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+
+@code {
+    bool _drawerOpen = true;
+
+   
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    decimal tokens = 0;
+
+    PlayerInfo playerInfo = new PlayerInfo();
+
+    protected override async Task OnInitializedAsync()
+    {
+        StateHasChanged();
+        GameViewModel.GameChanged += NotifyStateChanged;
+        playerInfo = GameViewModel.PlayerInfo;
+        await base.OnInitializedAsync();
+    }
+
+    public async Task NotifyStateChanged()
+    {
+        playerInfo = GameViewModel.PlayerInfo;
+        
+        StateHasChanged();
+    }
+
+    public async Task ShowHelpDialog()
+    {
+        var parameters = new DialogParameters<HelpDialog> { { x => x.GameViewModel, GameViewModel } };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<HelpDialog>("Help", parameters, options);
+    }
+
+    public async Task ShowExpandLandDialog()
+    {
+        var parameters = new DialogParameters<ExpandLandDialog> { { x => x.GameViewModel, GameViewModel } };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Medium };
+        var dialog = await DialogService.ShowAsync<ExpandLandDialog>("Expand Land", parameters, options);
+    }
+
+    public void Dispose()
+    {
+        GameViewModel.GameChanged -= NotifyStateChanged; //dispose
+    }
+}

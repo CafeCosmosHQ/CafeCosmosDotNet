@@ -18,6 +18,10 @@ namespace VisionsContracts
 
         public static AddEthereumChainParameter GetAddEthereumChainParameter(long chainId)
         {
+            if(chainId == 0)
+            {
+                return null;
+            }
             switch (chainId)
             {
                 case CHIADO:

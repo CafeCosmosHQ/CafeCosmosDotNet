@@ -1,0 +1,23 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.Items.Model;
+<MudDialog>
+    <DialogContent>
+        <Inventory GameViewModel="GameViewModel" OnInventoryItemSelected="InventoryItemSelected" CompactMode="true" />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+    public void InventoryItemSelected(InventoryItem item)
+    {
+        MudDialog.Close();
+    }
+
+    private void Close()
+    {
+        MudDialog.Close();
+    }
+}

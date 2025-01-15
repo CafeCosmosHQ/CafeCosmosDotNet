@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmos.AutomationExampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmosBlazor", "CafeComosBlazor\CafeCosmosBlazor.csproj", "{8BCE6D96-EC1D-D36F-0451-06C4CFC148CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmos.AutomationExample2", "CafeCosmos.AutomationExample2\CafeCosmos.AutomationExample2.csproj", "{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CafeCosmosHybrid", "CafeCosmosHybrid\CafeCosmosHybrid.csproj", "{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,16 @@ Global
 		{8BCE6D96-EC1D-D36F-0451-06C4CFC148CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BCE6D96-EC1D-D36F-0451-06C4CFC148CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BCE6D96-EC1D-D36F-0451-06C4CFC148CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2570B3EA-3BA0-1074-7E54-E1B17E550D9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BAB03D8-ADBC-42B7-8EA9-8646F81C7F0E}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

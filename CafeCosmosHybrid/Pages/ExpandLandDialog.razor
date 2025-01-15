@@ -1,0 +1,40 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.Items.Model;
+<MudDialog>
+    <DialogContent>
+        <MudText>Please input the number of rows and / colums to purchase more land, or press reveal land</MudText>
+        <MudTextField Label="Columns" @bind-Value="x" Variant="Variant.Text"></MudTextField>
+        <MudTextField Label="Rows" @bind-Value="y" Variant="Variant.Text"></MudTextField>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="SubmitAsync">Expand</MudButton>
+        <MudSpacer />
+        <MudButton Color="Color.Primary" OnClick="RevealAsync">Reveal Land</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    int x = 1;
+    int y = 1;
+    
+    async Task SubmitAsync()
+    {
+       MudDialog.Close();
+       await GameViewModel.ExpandLandAndWaitForReceiptAsync(x, y);
+       
+    }
+
+    async Task RevealAsync()
+    {
+        MudDialog.Close();
+        await GameViewModel.RevealAndGenerateChunkAndWaitForReceiptAsync();
+    }
+
+
+    void Cancel() => MudDialog.Cancel();
+
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+}

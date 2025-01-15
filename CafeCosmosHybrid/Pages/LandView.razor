@@ -1,0 +1,78 @@
+﻿@page "/landView/{landId}"
+@using System.Reflection;
+@using System.Numerics;
+@using CafeCosmosBlazor.Services;
+@using CafeCosmosBlazor.ViewModel;
+@using VisionsContracts.CraftingSystem;
+@using VisionsContracts.CraftingSystem.Model;
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land;
+@using VisionsContracts.LandLocalState;
+@using VisionsContracts.TestScenarios;
+@using VisionsContracts.Transformations;
+@using VisionsContracts.Transformations.Model;
+@using Nethereum.UI.Validation.Attributes;
+@using Nethereum.Util;
+@inject SelectedEthereumHostProviderService selectedHostProviderService
+@inject IVisionsContractAddressesService visionsContractAddressesService;
+@inject GameViewModel GameViewModel
+@inject NavigationManager NavigationManager
+
+<PageTitle>Land View</PageTitle>
+
+@inject LandPlayerViewModel LandPlayerViewModel;
+
+<PageTitle>Cafe Cosmos - Land View</PageTitle>
+
+<MudCard Class="ml-5 mt-5">
+    <MudCardContent>
+        <MudStack>
+            <MudGrid Justify="Justify.Center" Class="mt-1 pt-1">
+        <MudForm @bind-IsValid="@isValid">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center">
+           
+                <MudItem xs="12" sm="6" md="4">
+                        <MudTextField Label="Land Id" @bind-Value="LandPlayerViewModel.SelectedLandIndex" Variant="Variant.Outlined"> </MudTextField>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <AuthorizeView Roles="EthereumConnected">
+                        <Authorized>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(!isValid)" @onclick="LandPlayerViewModel.ViewPlayerLand">View Player Land</MudButton>
+                        </Authorized>
+                        <NotAuthorized>
+                            <MudButton Color="Color.Warning" Variant="Variant.Filled" Disabled=true>View Player Land (Not Connected)</MudButton>
+                        </NotAuthorized>
+                     </AuthorizeView>
+                </MudItem>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="@(()=>NavigationManager.NavigateTo(""))">Back to Game</MudButton>
+            </MudStack>
+            </MudForm>
+        </MudGrid>
+        <MudGrid Justify="Justify.Center" Class="mt-1 pt-1">
+            @if (LandPlayerViewModel.LandItems != null && LandPlayerViewModel.LandItems.Count > 0)
+            {
+                <Land GameViewModel="GameViewModel" ReadOnly="true" LandItems="LandPlayerViewModel.LandItems" />
+            }
+        </MudGrid>
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+
+
+
+@code{
+    [Parameter]
+    public string landId { get; set; }
+
+    bool isValid = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (landId != null)
+        {
+            LandPlayerViewModel.SelectedLandIndex = int.Parse(landId);
+            await LandPlayerViewModel.ViewPlayerLand();
+        }
+    }
+}
