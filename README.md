@@ -8,7 +8,7 @@ If you are interested on how to interact with the project, a good starting point
 
 ## Project Summary
 * **Visions Contracts**. The central part of the solution, includes all the core logic.
-* **Cafe Cosmos Blazor**. The game in an html / wasm version using Blazor.
+* **Cafe Cosmos Blazor**. The game in an html / wasm / hybrid windows / macos version using Blazor.
   <details>
     <summary>Expand to see the screenshot</summary>
     
