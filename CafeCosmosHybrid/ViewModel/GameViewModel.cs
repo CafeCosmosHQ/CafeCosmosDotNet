@@ -26,6 +26,9 @@ using VisionsContracts.Land.Systems.LandQuestsSystem.Model;
 using VisionsContracts.PlayerBalancePurchasing;
 using System.Text;
 using VisionsContracts.LandNFTs.ContractDefinition;
+using VisionsContracts.Land.Systems.MarketplaceSystem.Model;
+using static MudBlazor.CategoryTypes;
+using Item = VisionsContracts.Items.Model.Item;
 
 
 
@@ -65,6 +68,9 @@ namespace CafeCosmosBlazor.ViewModel
 
         public event Func<Task> GameChanged;
         public event Action<BigInteger, BigInteger> ZoomToItemSelected;
+
+        public List<LandMetadata> LandNames { get; set; }
+        public List<MarketPlaceListing> MarketPlaceListings { get; set; }
 
 
         public GameViewModel(SelectedEthereumHostProviderService selectedHostProviderService, IVisionsContractAddressesService visionsContractAddressesService)
@@ -153,6 +159,8 @@ namespace CafeCosmosBlazor.ViewModel
                 + GetLandAsInitialLandItem();
         }
 
+      
+
         public string GetLandAsInitialLandItem()
         {
             var stringBuilder = new StringBuilder();
@@ -180,6 +188,8 @@ namespace CafeCosmosBlazor.ViewModel
         {
             return playerService.SelectedLandId.ToString();
         }
+
+       
         private async Task GetSelectedChainId()
         {
             var web3 = await SelectedHost.GetWeb3Async();
@@ -792,6 +802,59 @@ namespace CafeCosmosBlazor.ViewModel
             return PlayerLocalState.LandQuestsLocalState.ActiveLandQuestGroups;
         }
 
+
+        //Marketplace
+        public async Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync()
+        {
+            var playerService = await GetPlayerServiceAsync();
+            var marketplaceService = playerService.GetPlayerMarketPlaceService();
+            return await marketplaceService.GetMarketPlaceListingsAsync();
+        }
+
+        public async Task EditMarketPlaceListingAsync(BigInteger listingId, decimal unitPriceInMainUnit, BigInteger quantity)
+        {
+            var playerService = await GetPlayerServiceAsync();
+            var marketplaceService = playerService.GetPlayerMarketPlaceService();
+            await marketplaceService.EditListingAndWaitForReceiptAsync(listingId, unitPriceInMainUnit, quantity, PlayerLocalState);
+        }
+
+        public async Task CancelMarketPlaceListingAsync(BigInteger listingId)
+        {
+            var playerService = await GetPlayerServiceAsync();
+            var marketplaceService = playerService.GetPlayerMarketPlaceService();
+            await marketplaceService.CancelListingAndWaitForReceiptAsync(listingId, PlayerLocalState);
+        }
+
+        public async Task<TransactionReceipt> CreateMarketPlaceListingAsync(BigInteger itemId, BigInteger quantity, decimal unitPriceInMainUnit)
+        {
+            var playerService = await GetPlayerServiceAsync();
+            var marketplaceService = playerService.GetPlayerMarketPlaceService();
+            var receipt = await marketplaceService.ListMarketplaceItemAndWaitForReceiptAsync(itemId, unitPriceInMainUnit, quantity, PlayerLocalState);
+            await LoadPlayerInfoAsync();
+            await NotifyGameStateChange();
+            return receipt;
+        }
+
+        public async Task RefreshMarketPlaceListingsAsync()
+        {
+            if (LandNames == null)
+            {
+                LandNames = await GetAllLandsAsync();
+            }
+
+            MarketPlaceListings = await GetMarketPlaceListingsAsync();
+        }
+
+        public async Task PurchaseMarketplaceListing(BigInteger listingId, BigInteger quantity)
+        {
+            var playerService = await GetPlayerServiceAsync();
+            var marketplaceService = playerService.GetPlayerMarketPlaceService();
+            var receipt = await marketplaceService.BuyFromMarketplaceValidateAndApproveItemRequestAndWaitForReceiptAsync(listingId, quantity, PlayerLocalState);
+            await LoadPlayerInfoAsync();
+            await NotifyGameStateChange();
+        }
+
+       
 
 
         /// <summary>

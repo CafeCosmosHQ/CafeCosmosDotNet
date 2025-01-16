@@ -1,0 +1,357 @@
+﻿@using CafeCosmosBlazor.ViewModel;
+@using System.Numerics
+@using VisionsContracts.Items;
+@using VisionsContracts.Items.Model;
+@using VisionsContracts.Land.Systems.MarketplaceSystem.Model;
+@using VisionsContracts.LandNFTs.ContractDefinition
+@using VisionsContracts.Land.Systems.MarketplaceSystem.Exceptions;
+@using VisionsContracts.PlayerBalancePurchasing.Exceptions
+
+<MudPaper Class="mt-5">
+    <MudCard Style="width:800px">
+        <MudCardContent>
+            <MudText Typo="Typo.h6">Find marketplace item to purchase</MudText>
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                @if (foundItem != null)
+                {
+                    <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(foundItem.Item)" Size="Size.Medium" />
+                }
+                <MudAutocomplete T="SearchItemMarketplace" MaxItems="1000"
+                Label="Enter the name of the item to find the listing" @bind-Value="foundItem"
+                SearchFunc="@SearchItemByName" ToStringFunc="@(e=> e==null?null : $"{e.Item.Name}, (Inventory: {e.InventoryQuantity})")">
+
+                    <ItemTemplate Context="e">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="5">
+                            <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(e.Item)" Size="Size.Medium" />
+                            <MudText Typo="Typo.body2">
+                                @($"{e.Item.Name}, (Inventory: {e.InventoryQuantity})")
+                            </MudText>
+                        </MudStack>
+                    </ItemTemplate>
+
+
+                </MudAutocomplete>
+            </MudStack>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="SelectFoundItem">Select</MudButton>
+        </MudCardActions>
+    </MudCard>
+
+
+    @if (selectedItem != null)
+    {
+        <MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
+            <MudTabPanel Text="For sale" >
+                <MudStack Row="true" Spacing="10">
+                    <MudCard Class="mt-3">
+                        <MudCardContent>
+                            <MudStack Row="true" Spacing="5">
+                                <MudText Typo="Typo.h5">Marketplace listings for @selectedItem.Name</MudText> <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(selectedItem)" Size="Size.Medium" />
+                            </MudStack>
+                            <MudText Typo="Typo.body2">Available in Inventory:  @GameViewModel.GetInventoryItemsFromPlayerLocalState().FirstOrDefault(x => x.ItemId == GetId(selectedItem))?.Count</MudText>
+
+                            <table width="100%">
+
+                                @foreach(var marketplaceListing in GetMarketPlaceListingsForSelectedItem())
+                                {
+                                    <tr>
+                                        <td>
+                                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                                <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(selectedItem)" Size="Size.Medium" />
+                                                <MudStack Spacing="0" Row="false" AlignItems="AlignItems.Start">
+                                                    <MudText Typo="Typo.body2">
+                                                        @GetLandName(marketplaceListing.Owner)
+                                                    </MudText>
+                                                    <MudText Typo="Typo.body2">
+                                                        <i>Price per unit: @marketplaceListing.UnitPriceInMainUnit</i>
+                                                    </MudText>
+                                                    <MudText Typo="Typo.body2">
+                                                        <i>Quantity for sale: @marketplaceListing.Quantity</i>
+                                                    </MudText>
+                                                </MudStack>
+                                            </MudStack>
+                                        </td>
+
+                                        <td>
+                                            @if (marketplaceListing.Owner.ToString() != GameViewModel.GetLandId())
+                                            {
+                                                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => SelectListing(marketplaceListing))">Purchase</MudButton>
+                                            }
+                                            else
+                                            {
+                                                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => SelectListing(marketplaceListing))">Edit listing</MudButton>
+                                            }
+                                        </td>
+
+                                    </tr>
+                                }
+                            </table>
+                        </MudCardContent>
+                    </MudCard>
+                    @if (selectedMarketplaceListing != null)
+                    {
+                        <MudCard Class="mt-16">
+                            <MudCardContent>
+
+                                @if (IsSelectedListingOwner())
+                                {
+                                    <MudText Typo="Typo.h5">Edit listing for @selectedItem.Name</MudText>
+                                    <MudTextField Label="Price per unit" @bind-Value="editingListingPrice" Type="InputType.Number">  </MudTextField>
+                                    <MudTextField Label="Quantity" @bind-Value="editingListingQuantity" Type="InputType.Number">  </MudTextField>
+
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.h5">Purchase from Marketplace @selectedItem.Name</MudText>
+                                    <MudText Typo="Typo.body2">Owner:  @GetLandName(selectedMarketplaceListing.Owner), Price: @selectedMarketplaceListing.UnitPriceInMainUnit Available: @selectedMarketplaceListing.Quantity</MudText>
+                                    <MudTextField Label="Quantity" @bind-Value="purchaseQuantity" Type="InputType.Number"> </MudTextField>
+                                }
+
+                            </MudCardContent>
+                            <MudCardActions>
+
+                                @if (IsSelectedListingOwner())
+                                {
+                                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="EditListingAsync">Save</MudButton>
+                                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="CancelListingAsync">Remove listing</MudButton>
+
+                                }
+                                else
+                                {
+                                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="PurchaseItemAsync">Purchase Item</MudButton>
+                                }
+
+                            </MudCardActions>
+                        </MudCard>
+                    }
+                </MudStack>
+            </MudTabPanel>
+            <MudTabPanel Text="Sell" >
+                @if (GameViewModel.GetInventoryItemsFromPlayerLocalState().FirstOrDefault(x => x.ItemId == GetId(selectedItem)).Count > 0)
+                {
+                    <MudCard Class="mt-3">
+                        <MudCardContent>
+                            <MudStack Row="true" Spacing="5">
+                                <MudText Typo="Typo.h5">Sell your @selectedItem.Name</MudText> <MudAvatar Color="Color.Transparent" Variant="Variant.Outlined" Image="@GetImage(selectedItem)" Size="Size.Medium" />
+                            </MudStack>
+                            <MudText Typo="Typo.body2">Available in Inventory: @GameViewModel.GetInventoryItemsFromPlayerLocalState().FirstOrDefault(x => x.ItemId == GetId(selectedItem))?.Count</MudText>
+                            <MudTextField Label="Price per unit" @bind-Value="newListingPrice" Type="InputType.Number">  </MudTextField>
+                            <MudTextField Label="Quantity" @bind-Value="newListingQuantity" Type="InputType.Number">  </MudTextField>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="CreateListingAsync">Create new listing</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                }
+                else
+                {
+                    <MudCard Class="mt-16">
+                        <MudCardContent>
+                     
+                                <MudText Typo="Typo.h5">No items in your inventory to sell @selectedItem.Name</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                }
+            </MudTabPanel>
+      </MudTabs>
+
+       
+    }
+</MudPaper>
+@if(!string.IsNullOrEmpty(errorMessage))
+{
+    <MudAlert Class="mt-5" Severity="Severity.Error" Square="true" ShowCloseIcon="true" CloseIconClicked="(() => errorMessage = String.Empty)">@errorMessage</MudAlert>
+}
+
+@code {
+    [Parameter] public GameViewModel GameViewModel { get; set; }
+
+
+    private SearchItemMarketplace foundItem;
+    private Item selectedItem;
+    private MarketPlaceListing selectedMarketplaceListing;
+
+    private decimal editingListingPrice;
+    private int editingListingQuantity;
+
+    private decimal newListingPrice;
+    private int newListingQuantity;
+
+    private int purchaseQuantity;
+
+
+
+
+    private string errorMessage;
+
+    private async Task<IEnumerable<SearchItemMarketplace>> SearchItemByName(string value)
+    {
+        var items = GetAllSearchItemsForMarketplace();
+        if (string.IsNullOrEmpty(value)) return items;
+
+        return items.Where(x => x.Item.Name.ToLower().Contains(value.ToLower()));
+    }
+
+    private List<SearchItemMarketplace> GetAllSearchItemsForMarketplace()
+    {
+        var returnList = new List<SearchItemMarketplace>();
+        var userInventory = GameViewModel.GetInventoryItemsFromPlayerLocalState();
+        var allThemeItems = ThemeService.GetAllItems();
+        var inventoryItems = DefaultItems.GetAllInventoryItems().Where(x => !allThemeItems.Any(y => y.Id == x.Id));
+        foreach(var inventoryItem in inventoryItems)
+        {
+            var userInventoryItem = userInventory.FirstOrDefault(x => x.ItemId == inventoryItem.Id);
+
+            var searchItem = new SearchItemMarketplace()
+                {
+                    Item = inventoryItem,
+                    InventoryQuantity = (int)userInventoryItem?.Count
+                };
+            returnList.Add(searchItem);
+        }
+
+        return returnList;
+    }
+
+    private class SearchItemMarketplace
+    {
+        public Item Item { get; set; }
+        public int Quantity { get; set; }
+        public int InventoryQuantity { get; set; }
+
+    }
+
+
+
+    public bool IsSelectedListingOwner()
+    {
+        if (selectedMarketplaceListing == null) return false;
+        return selectedMarketplaceListing.Owner.ToString() == GameViewModel.GetLandId();
+    }
+
+    public string GetLandName(BigInteger landId)
+    {
+        if (GameViewModel.LandNames == null) return "Unknown";
+        var land = GameViewModel.LandNames.FirstOrDefault(x => x.LandId == landId);
+        if (land == null) return "Unknown";
+        return land.Name;
+    }
+
+    public IEnumerable<MarketPlaceListing> GetMarketPlaceListingsForSelectedItem()
+    {
+        if (GameViewModel.MarketPlaceListings == null) return new List<MarketPlaceListing>();
+        return GameViewModel.MarketPlaceListings.Where(x => x.ItemId == GetId(selectedItem)).OrderBy(x => x.UnitPriceInMainUnit); 
+    }
+
+    public async Task SelectFoundItem()
+    {
+        selectedItem = foundItem.Item;
+        foundItem = null;
+        selectedMarketplaceListing = null;
+        await GameViewModel.RefreshMarketPlaceListingsAsync();
+    }
+
+    public async Task EditListingAsync()
+    {
+        await GameViewModel.EditMarketPlaceListingAsync(selectedMarketplaceListing.ListingId, editingListingPrice, editingListingQuantity);
+        await GameViewModel.RefreshMarketPlaceListingsAsync();  
+        selectedMarketplaceListing = null;
+        editingListingPrice = 0;
+        editingListingQuantity = 0;
+    }
+
+    public void SelectListing(MarketPlaceListing listing)
+    {
+        this.selectedMarketplaceListing = listing;
+        if (IsSelectedListingOwner())
+        {
+            editingListingPrice = listing.UnitPriceInMainUnit;
+            editingListingQuantity = (int) listing.Quantity;
+        }
+        else
+        {
+            purchaseQuantity = 0;
+        }
+    }
+
+    public async Task CancelListingAsync()
+    {
+        await GameViewModel.CancelMarketPlaceListingAsync(selectedMarketplaceListing.ListingId);
+        await GameViewModel.RefreshMarketPlaceListingsAsync();
+        selectedMarketplaceListing = null;
+        editingListingPrice = 0;
+        editingListingQuantity = 0;
+    }
+
+    public async Task CreateListingAsync()
+    {
+        await GameViewModel.CreateMarketPlaceListingAsync(selectedItem.Id, newListingQuantity, newListingPrice);
+        await GameViewModel.RefreshMarketPlaceListingsAsync();
+        newListingPrice = 0;
+        newListingQuantity = 0;
+    }
+
+    public async Task PurchaseItemAsync()
+    {
+        errorMessage = null;
+
+        try
+        {
+            await GameViewModel.PurchaseMarketplaceListing(selectedMarketplaceListing.ListingId, purchaseQuantity);
+            await GameViewModel.RefreshMarketPlaceListingsAsync(); ;
+            selectedMarketplaceListing = null;
+            purchaseQuantity = 0;
+        }
+        catch (InsufficientQuantityInMarketplaceListingToPurchaseException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch (InsufficientBalanceToPurchaseException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+   }
+    public async Task SelectItemAsync(Item item)
+    {
+        errorMessage = null;
+        if (item != null)
+        {
+            await GameViewModel.RefreshMarketPlaceListingsAsync();
+            this.selectedItem = item;
+           
+        }
+        else
+        {
+            this.errorMessage = "Item not found";
+        }
+    }
+
+
+
+    private int GetId(Item item)
+    {
+        if (item == null) return 0;
+        return item.Id;
+    }
+
+
+    private string GetImage(Item item)
+    {
+        var image = ItemImages.AllImages.FirstOrDefault(x => x.Item.Id == item.Id);
+        if (image != null)
+        {
+            return "images/icons/" + image.Image;
+        }
+        return null;
+    }
+
+    
+
+  
+
+}

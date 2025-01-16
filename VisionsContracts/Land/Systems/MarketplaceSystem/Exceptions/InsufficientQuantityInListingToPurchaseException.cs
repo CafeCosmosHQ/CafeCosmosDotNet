@@ -6,7 +6,7 @@ using VisionsContracts.Land.Systems.MarketplaceSystem.ContractDefinition;
 namespace VisionsContracts.Land.Systems.MarketplaceSystem.Exceptions
 {
     [Serializable]
-    internal class InsufficientQuantityInMarketplaceListingToPurchaseException : Exception
+    public class InsufficientQuantityInMarketplaceListingToPurchaseException : Exception
     {
         public MarketPlaceListingDTO Listing { get; }
         public BigInteger Quantity { get; }
